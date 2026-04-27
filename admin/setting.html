@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Sistem - Laporin Admin</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config to match PRD Design System -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: { DEFAULT: '#2563EB', dark: '#1D4ED8' },
+                        secondary: '#059669',
+                        warning: '#D97706',
+                        danger: '#DC2626',
+                        info: '#0891B2',
+                        dark: '#1E293B',
+                        light: '#F8FAFC',
+                        muted: '#94A3B8',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F8FAFC;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        /* Toggle Switch CSS */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #2563EB;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #2563EB;
+        }
+
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .toggle-label {
+            width: 3rem;
+            /* 48px */
+            height: 1.5rem;
+            /* 24px */
+            background-color: #cbd5e1;
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-label::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 1.25rem;
+            /* 20px */
+            height: 1.25rem;
+            /* 20px */
+            background-color: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .toggle-checkbox:checked+.toggle-label::after {
+            transform: translateX(1.5rem);
+            /* 24px */
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-dark font-sans h-screen flex overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Admin -->
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 bg-dark w-64 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
+        <div class="h-16 flex items-center px-6 bg-slate-900 border-b border-slate-800">
+            <i data-lucide="shield-check" class="text-primary w-6 h-6 mr-2"></i>
+            <span class="text-white font-extrabold text-xl tracking-tight">Laporin<span
+                    class="text-primary">Admin</span></span>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            <div class="px-3 mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">Dashboard</div>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="pie-chart" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Beranda Admin
+            </a>
+
+            <div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">Manajemen Data</div>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Data Laporan
+            </a>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="users" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Data Pengguna
+            </a>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="hard-hat" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Data Petugas
+            </a>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="tags" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Kategori Laporan
+            </a>
+
+            <div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">Sistem</div>
+            <!-- Active Menu -->
+            <a href="#"
+                class="flex items-center px-3 py-2.5 bg-primary/20 text-primary border border-primary/30 rounded-lg font-medium group transition-colors">
+                <i data-lucide="settings" class="w-5 h-5 mr-3"></i>
+                Pengaturan
+            </a>
+        </nav>
+
+        <div class="p-4 bg-slate-900 border-t border-slate-800">
+            <div class="flex items-center">
+                <div
+                    class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold overflow-hidden border border-slate-600">
+                    <img src="https://ui-avatars.com/api/?name=Ibu+Sari&background=334155&color=fff" alt="Avatar"
+                        class="w-full h-full object-cover">
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-white">Ibu Sari</p>
+                    <p class="text-[10px] text-slate-400 font-mono">Dinas Kominfo</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <header
+            class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-30 shrink-0 shadow-sm">
+            <button class="lg:hidden text-muted hover:text-dark p-2 -ml-2 rounded-lg" onclick="toggleSidebar()">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <div class="hidden sm:block">
+                <nav class="flex text-sm text-muted font-medium items-center">
+                    <a href="#" class="hover:text-dark">Sistem</a>
+                    <i data-lucide="chevron-right" class="w-4 h-4 mx-1"></i>
+                    <span class="text-dark">Pengaturan</span>
+                </nav>
+            </div>
+            <div class="flex items-center ml-auto">
+                <button
+                    class="relative p-2 text-muted hover:text-dark rounded-full hover:bg-slate-50 transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-6 lg:p-8">
+            <div class="max-w-5xl mx-auto space-y-6">
+
+                <!-- Page Header -->
+                <div>
+                    <h2 class="text-2xl font-bold text-dark tracking-tight">Pengaturan Sistem</h2>
+                    <p class="text-muted mt-1 text-sm">Konfigurasi pengaturan dasar aplikasi Laporin Mataram.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+                    <!-- Tabs Navigation (Left Sidebar on Desktop) -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <nav class="flex flex-col" aria-label="Tabs">
+                                <a href="#"
+                                    class="flex items-center px-4 py-3 bg-primary/10 text-primary font-medium border-l-4 border-primary text-sm transition-colors">
+                                    <i data-lucide="layout" class="w-4 h-4 mr-3"></i> Tampilan Umum
+                                </a>
+                                <a href="#"
+                                    class="flex items-center px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-dark font-medium border-l-4 border-transparent text-sm transition-colors">
+                                    <i data-lucide="bell" class="w-4 h-4 mr-3"></i> Notifikasi
+                                </a>
+                                <a href="#"
+                                    class="flex items-center px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-dark font-medium border-l-4 border-transparent text-sm transition-colors">
+                                    <i data-lucide="shield" class="w-4 h-4 mr-3"></i> Keamanan
+                                </a>
+                                <a href="#"
+                                    class="flex items-center px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-dark font-medium border-l-4 border-transparent text-sm transition-colors">
+                                    <i data-lucide="database" class="w-4 h-4 mr-3"></i> Backup Data
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Content Area (Right Side) -->
+                    <div class="lg:col-span-3 space-y-6">
+
+                        <!-- Panel: Pengaturan Umum -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-100">
+                                <h3 class="text-lg font-bold text-dark">Profil Instansi & Tampilan</h3>
+                            </div>
+                            <div class="p-6 space-y-6">
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="namaApp" class="block text-sm font-semibold text-dark mb-1">Nama
+                                            Aplikasi</label>
+                                        <input type="text" id="namaApp" value="Laporin"
+                                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm text-slate-700">
+                                    </div>
+                                    <div>
+                                        <label for="namaInstansi"
+                                            class="block text-sm font-semibold text-dark mb-1">Nama Instansi /
+                                            Pemerintah</label>
+                                        <input type="text" id="namaInstansi" value="Pemerintah Kota Mataram"
+                                            class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm text-slate-700">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-dark mb-2">Logo Instansi</label>
+                                    <div class="flex items-center space-x-4">
+                                        <div
+                                            class="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center">
+                                            <i data-lucide="image" class="w-6 h-6 text-slate-400"></i>
+                                        </div>
+                                        <button type="button"
+                                            class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                                            Ubah Logo
+                                        </button>
+                                        <span class="text-xs text-muted">Format: PNG, JPG (Maks 1MB)</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="alamatInstansi"
+                                        class="block text-sm font-semibold text-dark mb-1">Alamat Kantor Pusat</label>
+                                    <textarea id="alamatInstansi" rows="2"
+                                        class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm text-slate-700 resize-y">Jl. Pejanggik No.16, Mataram Barat, Kec. Selaparang, Kota Mataram, Nusa Tenggara Bar. 83112</textarea>
+                                </div>
+                            </div>
+                            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end">
+                                <button type="button"
+                                    class="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                                    Simpan Perubahan
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Panel: Pengaturan Notifikasi -->
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-100">
+                                <h3 class="text-lg font-bold text-dark">Sistem & Notifikasi</h3>
+                            </div>
+                            <div class="p-6 space-y-6">
+
+                                <div class="flex items-center justify-between py-2 border-b border-slate-100 pb-4">
+                                    <div>
+                                        <p class="font-bold text-dark text-sm">Auto-Assign Petugas</p>
+                                        <p class="text-xs text-muted mt-0.5">Sistem secara otomatis menugaskan laporan
+                                            ke petugas (berdasarkan divisi dan ketersediaan) jika admin belum merespon
+                                            dalam 1 jam.</p>
+                                    </div>
+                                    <div
+                                        class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                        <input type="checkbox" name="toggle1" id="toggle1"
+                                            class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+                                        <label for="toggle1"
+                                            class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between py-2 border-b border-slate-100 pb-4">
+                                    <div>
+                                        <p class="font-bold text-dark text-sm">Notifikasi Email ke Warga</p>
+                                        <p class="text-xs text-muted mt-0.5">Kirim email otomatis ke warga saat status
+                                            laporannya berubah (Menunggu -> Diproses -> Selesai).</p>
+                                    </div>
+                                    <div
+                                        class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                        <input type="checkbox" name="toggle2" id="toggle2"
+                                            class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                                            checked />
+                                        <label for="toggle2"
+                                            class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between py-2">
+                                    <div>
+                                        <p class="font-bold text-dark text-sm">Maintenance Mode</p>
+                                        <p class="text-xs text-muted mt-0.5">Aktifkan untuk menutup sementara halaman
+                                            publik agar warga tidak bisa melapor saat sedang pemeliharaan sistem.</p>
+                                    </div>
+                                    <div
+                                        class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                        <input type="checkbox" name="toggle3" id="toggle3"
+                                            class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+                                        <label for="toggle3"
+                                            class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Sidebar Toggle Logic
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+
+</html>

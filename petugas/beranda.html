@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beranda Petugas - Laporin Mataram</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config to match PRD Design System -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563EB',
+                            dark: '#1D4ED8',
+                        },
+                        secondary: '#059669',
+                        warning: '#D97706',
+                        danger: '#DC2626',
+                        info: '#0891B2',
+                        dark: '#1E293B',
+                        light: '#F8FAFC',
+                        muted: '#94A3B8',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F8FAFC;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+
+<body class="bg-light text-dark font-sans h-screen flex overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 bg-white w-64 border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-200">
+            <div class="bg-dark text-white p-1.5 rounded mr-2 flex items-center justify-center">
+                <i data-lucide="hard-hat" class="w-5 h-5"></i>
+            </div>
+            <span class="text-dark font-extrabold text-xl tracking-tight">Petugas<span
+                    class="text-primary">App</span></span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            <div class="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Menu Utama</div>
+            <a href="#" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                Beranda
+            </a>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="clipboard-list" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Daftar Tugas
+                <span class="ml-auto bg-danger text-white text-[10px] font-bold px-2 py-0.5 rounded-full">2</span>
+            </a>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="history" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Riwayat Penanganan
+            </a>
+
+            <div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Pengaturan</div>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Profil Saya
+            </a>
+        </nav>
+
+        <!-- User Info -->
+        <div class="p-4 border-t border-slate-200">
+            <a href="#" class="flex items-center group">
+                <div
+                    class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold overflow-hidden border border-orange-200">
+                    <img src="https://ui-avatars.com/api/?name=Pak+Budi&background=ffedd5&color=ea580c" alt="Avatar"
+                        class="w-full h-full object-cover">
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">Pak Budi</p>
+                    <p class="text-xs text-muted">Dinas Pertamanan</p>
+                </div>
+            </a>
+            <button
+                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- Top Navbar -->
+        <header
+            class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-30 shrink-0">
+            <button
+                class="lg:hidden text-muted hover:text-dark p-2 -ml-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                onclick="toggleSidebar()">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <div class="hidden sm:block">
+                <h1 class="text-lg font-bold text-dark">Dashboard Petugas Lapangan</h1>
+            </div>
+            <div class="flex items-center ml-auto">
+                <button
+                    class="relative p-2 text-muted hover:text-dark rounded-full hover:bg-slate-50 transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                    <span class="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-danger ring-2 ring-white"></span>
+                    </span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto bg-light p-4 sm:p-6 lg:p-8">
+            <div class="max-w-6xl mx-auto space-y-6">
+
+                <!-- Welcome Section -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-dark tracking-tight">Selamat Bertugas, Pak
+                            Budi! 👷‍♂️</h2>
+                        <p class="text-muted mt-1 text-sm sm:text-base">Anda memiliki <span
+                                class="font-bold text-danger">2 tugas aktif</span> yang perlu segera ditangani hari ini.
+                        </p>
+
+                    </div>
+                </div>
+
+                <!-- Stats Grid (Petugas Specific) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Total Ditugaskan -->
+                    <div
+                        class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-slate-300 transition-colors">
+                        <div>
+                            <p class="text-sm font-medium text-muted">Total Ditugaskan</p>
+                            <p class="text-3xl font-bold text-dark mt-1">15</p>
+                        </div>
+                        <div
+                            class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                            <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <!-- Sedang Diproses -->
+                    <div
+                        class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-info/30 transition-colors relative overflow-hidden">
+                        <div class="absolute inset-x-0 bottom-0 h-1 bg-info"></div>
+                        <div>
+                            <p class="text-sm font-medium text-muted">Sedang Diproses</p>
+                            <p class="text-3xl font-bold text-dark mt-1">2</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-info/10 flex items-center justify-center text-info">
+                            <i data-lucide="settings" class="w-6 h-6 animate-[spin_4s_linear_infinite]"></i>
+                        </div>
+                    </div>
+
+                    <!-- Selesai -->
+                    <div
+                        class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-secondary/30 transition-colors">
+                        <div>
+                            <p class="text-sm font-medium text-muted">Selesai Ditangani</p>
+                            <p class="text-3xl font-bold text-dark mt-1">13</p>
+                        </div>
+                        <div
+                            class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                            <i data-lucide="check-square" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Tasks Section -->
+                <div>
+                    <div class="flex items-center justify-between mb-4 mt-4">
+                        <h3 class="text-lg font-bold text-dark flex items-center">
+                            <i data-lucide="zap" class="w-5 h-5 text-warning mr-2"></i>
+                            Tugas Aktif (Prioritas)
+                        </h3>
+                        <a href="#" class="text-sm font-medium text-primary hover:text-primary-dark">Lihat Semua Tugas
+                            &rarr;</a>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+
+                        <!-- Desktop Table -->
+                        <div class="hidden md:block overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-sm">
+                                        <th class="py-3 px-4 font-semibold text-dark">Informasi Kerusakan</th>
+                                        <th class="py-3 px-4 font-semibold text-dark">Lokasi</th>
+                                        <th class="py-3 px-4 font-semibold text-dark">Waktu Ditugaskan</th>
+                                        <th class="py-3 px-4 text-center font-semibold text-dark">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm divide-y divide-slate-100">
+                                    <!-- Task 1 (Diproses) -->
+                                    <tr class="hover:bg-slate-50 transition-colors">
+                                        <td class="py-4 px-4 align-top">
+                                            <div class="flex items-start">
+                                                <div
+                                                    class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center mr-3 shrink-0 border border-slate-200">
+                                                    <i data-lucide="tree-deciduous" class="w-5 h-5 text-slate-600"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-dark mb-1">Pohon Tumbang Menutup Jalan</p>
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info uppercase tracking-wide border border-info/20">
+                                                            Sedang Diproses
+                                                        </span>
+                                                        <span
+                                                            class="text-xs text-danger font-semibold flex items-center">
+                                                            <i data-lucide="alert-circle" class="w-3 h-3 mr-1"></i>
+                                                            Prioritas Tinggi
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-xs text-muted">Pelapor: Andi | #LP-20260408</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 align-top">
+                                            <p class="text-dark font-medium">Taman Sangkareang Pintu Utara</p>
+                                            <p class="text-xs text-muted">Kecamatan Mataram</p>
+                                        </td>
+                                        <td class="py-4 px-4 align-top text-muted">
+                                            <p class="text-dark">Hari ini, 10:00 WITA</p>
+                                            <p class="text-xs">4 Jam yang lalu</p>
+                                        </td>
+                                        <td class="py-4 px-4 align-top text-center">
+                                            <button
+                                                class="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-full shadow-sm">
+                                                Update Status
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Task 2 (Baru/Menunggu) -->
+                                    <tr class="hover:bg-slate-50 transition-colors">
+                                        <td class="py-4 px-4 align-top">
+                                            <div class="flex items-start">
+                                                <div
+                                                    class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center mr-3 shrink-0 border border-slate-200">
+                                                    <i data-lucide="leaf" class="w-5 h-5 text-slate-600"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-dark mb-1">Dahan Patah di Area Trotoar</p>
+                                                    <div class="flex items-center gap-2 mb-1">
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning uppercase tracking-wide border border-warning/20">
+                                                            Tugas Baru
+                                                        </span>
+                                                    </div>
+                                                    <p class="text-xs text-muted">Pelapor: Budi S. | #LP-20260409</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 align-top">
+                                            <p class="text-dark font-medium">Jl. Majapahit (Depan RS)</p>
+                                            <p class="text-xs text-muted">Kecamatan Mataram</p>
+                                        </td>
+                                        <td class="py-4 px-4 align-top text-muted">
+                                            <p class="text-dark">Hari ini, 13:15 WITA</p>
+                                            <p class="text-xs">1 Jam yang lalu</p>
+                                        </td>
+                                        <td class="py-4 px-4 align-top text-center">
+                                            <button
+                                                class="bg-white border border-primary text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-full shadow-sm">
+                                                Mulai Proses
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Card View -->
+                        <div class="md:hidden flex flex-col divide-y divide-slate-100">
+                            <!-- Card 1 -->
+                            <div class="p-4 bg-white">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info uppercase tracking-wide border border-info/20">
+                                        Sedang Diproses
+                                    </span>
+                                    <span class="text-xs font-semibold text-danger flex items-center">
+                                        <i data-lucide="alert-circle" class="w-3 h-3 mr-1"></i> Prioritas Tinggi
+                                    </span>
+                                </div>
+                                <h4 class="font-bold text-dark text-base mb-2">Pohon Tumbang Menutup Jalan</h4>
+
+                                <div class="bg-slate-50 rounded-lg p-3 mb-3 border border-slate-100 space-y-2">
+                                    <div class="flex items-start text-sm">
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 mr-2 mt-0.5"></i>
+                                        <span class="text-dark font-medium">Taman Sangkareang Pintu Utara, Kec.
+                                            Mataram</span>
+                                    </div>
+                                    <div class="flex items-start text-sm">
+                                        <i data-lucide="clock" class="w-4 h-4 text-slate-400 mr-2 mt-0.5"></i>
+                                        <span class="text-muted">Ditugaskan: Hari ini, 10:00 WITA</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    class="w-full bg-primary hover:bg-primary-dark text-white py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                                    Update Status Penanganan
+                                </button>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="p-4 bg-white border-l-4 border-warning">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning uppercase tracking-wide border border-warning/20">
+                                        Tugas Baru
+                                    </span>
+                                </div>
+                                <h4 class="font-bold text-dark text-base mb-2">Dahan Patah di Area Trotoar</h4>
+
+                                <div class="bg-slate-50 rounded-lg p-3 mb-3 border border-slate-100 space-y-2">
+                                    <div class="flex items-start text-sm">
+                                        <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 mr-2 mt-0.5"></i>
+                                        <span class="text-dark font-medium">Jl. Majapahit (Depan RS), Kec.
+                                            Mataram</span>
+                                    </div>
+                                    <div class="flex items-start text-sm">
+                                        <i data-lucide="clock" class="w-4 h-4 text-slate-400 mr-2 mt-0.5"></i>
+                                        <span class="text-muted">Ditugaskan: Hari ini, 13:15 WITA</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    class="w-full bg-white border border-primary text-primary hover:bg-primary/5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                                    Mulai Tangani Laporan
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Sidebar Toggle Logic for Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,411 @@
+<?php
+session_start();
+
+// Jika belum login, redirect ke halaman login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+// Ambil data dari session
+$nama     = $_SESSION['nama'];
+$username = $_SESSION['username'];
+?>
+
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beranda User - LaporIn Mataram</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind Config to match LaporIn Design System -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            DEFAULT: '#3A5A40', // Dark Green
+                            dark: '#2B4330',    // Darker Green for hover
+                        },
+                        accent: {
+                            DEFAULT: '#A3B18A', // Light Green
+                            dark: '#8b9a70',
+                        },
+                        secondary: '#588157',   // Medium Green (For Selesai Status)
+                        warning: '#D97706',     // Amber
+                        danger: '#DC2626',      // Red
+                        info: '#0284C7',        // Blue
+                        dark: '#1E293B',        // Slate 800
+                        light: '#F8FAFC',       // Slate 50
+                        muted: '#94A3B8',       // Slate 400
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar matching landing page */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F8FAFC;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #A3B18A;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3A5A40;
+        }
+    </style>
+</head>
+
+<body class="bg-light text-dark font-sans h-screen flex overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 bg-white w-64 border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-200">
+            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white mr-3">
+                <i data-lucide="leaf" class="w-5 h-5"></i>
+            </div>
+            <span class="text-primary font-extrabold text-2xl tracking-tight">Lapor<span class="text-accent">In</span></span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            <a href="#" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                Beranda
+            </a>
+            <a href="buatLaporan.php"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="plus circle" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Buat Laporan
+            </a>
+            <a href="daftarLaporan.php"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Laporan Saya
+            </a>
+            <a href="profile.php"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Profil
+            </a>
+        </nav>
+
+        <!-- User Info (Bottom Sidebar) -->
+        <div class="p-4 border-t border-slate-200">
+            <a href="#" class="flex items-center group">
+                <div
+                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
+                    <img src="<?php echo 'https://ui-avatars.com/api/?name=' . urlencode($username) . '&background=A3B18A&color=ffffff'; ?>"
+                    alt="Avatar" class="w-full h-full object-cover">
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">
+                        <?php echo $username; ?>
+                    </p>
+                    <p class="text-xs text-muted">Masyarakat</p>
+                </div>
+            </a>
+            <a href="logout.php"
+                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                 Keluar
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- Top Navbar -->
+        <header class="h-16 bg-accent border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-30">
+            <!-- Mobile Menu Button -->
+            <button
+                class="lg:hidden text-muted hover:text-dark p-2 -ml-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                onclick="toggleSidebar()">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+
+            <!-- Title (Hidden on small screens) -->
+            <div class="hidden sm:block">
+                <h1 class="text-lg font-bold text-dark">Dashboard Masyarakat</h1>
+            </div>
+
+        </header>
+
+        <!-- Main Content (Scrollable) -->
+        <main class="flex-1 overflow-y-auto bg-primary p-4 sm:p-6 lg:p-8">
+
+            <div class="max-w-6xl mx-auto space-y-6">
+                <!-- Welcome Section & Action -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Halo, <?php echo $username; ?> 👋
+                        </h2>
+                        <p class="text-muted mt-1  sm:text-sm">Pantau dan kelola laporan infrastruktur di
+                            lingkungan Anda.</p>
+                    </div>
+                    <a href="buatLaporan.php"
+                        class="w-full sm:w-auto bg-accent hover:bg-accent-dark text-white px-5 py-2.5 rounded-lg font-semibold flex items-center justify-center transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                        <i data-lucide="plus circle" class="w-5 h-5 mr-2"></i>
+                        Buat Laporan Baru
+                    </a>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Total Laporan -->
+                    <div
+                        class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-primary/30 transition-colors">
+                        <div>
+                            <p class="text-sm font-medium text-muted">Total Laporan</p>
+                            <p class="text-3xl font-bold text-dark mt-1">3</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <i data-lucide="layers" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <!-- Menunggu -->
+                    <div
+                        class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-warning/30 transition-colors">
+                        <div>
+                            <p class="text-sm font-medium text-muted">Menunggu</p>
+                            <p class="text-3xl font-bold text-dark mt-1">1</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+                            <i data-lucide="clock" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+
+                    <!-- Diproses -->
+                    <div
+                        class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-info/30 transition-colors">
+                        <div>
+                            <p class="text-sm font-medium text-muted">Diproses</p>
+                            <p class="text-3xl font-bold text-dark mt-1">1</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-info/10 flex items-center justify-center text-info">
+                            <i data-lucide="settings" class="w-6 h-6 animate-[spin_3s_linear_infinite]"></i>
+                        </div>
+                    </div>
+
+                    <!-- Selesai -->
+                    <div
+                        class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-secondary/30 transition-colors">
+                        <div>
+                            <p class="text-sm font-medium text-muted">Selesai</p>
+                            <p class="text-3xl font-bold text-dark mt-1">1</p>
+                        </div>
+                        <div
+                            class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                            <i data-lucide="check-circle" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Reports Section -->
+                <div>
+                    <div class="flex items-center justify-between mb-4 mt-8">
+                        <h3 class="text-lg font-bold text-white">Laporan Terbaru Anda</h3>
+                        <a href="daftarLaporan.html" class="text-sm font-medium text-primary hover:text-primary-dark">Lihat Semua
+                            &rarr;</a>
+                    </div>
+
+                    <!-- Reports Table (Desktop) & Cards (Mobile) -->
+                    <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+
+                        <!-- Desktop Table View -->
+                        <div class="hidden md:block overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-sm">
+                                        <th class="py-3 px-4 font-semibold text-dark">Judul Laporan & Kategori</th>
+                                        <th class="py-3 px-4 font-semibold text-dark">Lokasi</th>
+                                        <th class="py-3 px-4 font-semibold text-dark">Tanggal</th>
+                                        <th class="py-3 px-4 font-semibold text-dark">Status</th>
+                                        <th class="py-3 px-4 text-right font-semibold text-dark">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm divide-y divide-slate-100">
+                                    <!-- Row 1: Menunggu -->
+                                    <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="window.location='detailLaporan.html'">
+                                        <td class="py-4 px-4">
+                                            <p class="font-bold text-dark group-hover:text-primary transition-colors">
+                                                Jalan Berlubang Dalam</p>
+                                            <div class="flex items-center text-muted mt-1 text-xs">
+                                                <i data-lucide="road" class="w-3.5 h-3.5 mr-1"></i>
+                                                Jalan Rusak
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 text-muted">Jl. Pejanggik, Cakranegara</td>
+                                        <td class="py-4 px-4 text-muted">Hari ini, 08:30</td>
+                                        <td class="py-4 px-4">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-warning/10 text-warning border border-warning/20">
+                                                MENUNGGU
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-right">
+                                            <button
+                                                class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                                                title="Lihat Detail">
+                                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <!-- Row 2: Diproses -->
+                                    <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="window.location='detailLaporan.html'">
+                                        <td class="py-4 px-4">
+                                            <p class="font-bold text-dark group-hover:text-primary transition-colors">
+                                                Pohon Tumbang di Taman</p>
+                                            <div class="flex items-center text-muted mt-1 text-xs">
+                                                <i data-lucide="tree-deciduous" class="w-3.5 h-3.5 mr-1"></i>
+                                                Pohon Tumbang
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 text-muted">Taman Sangkareang, Mataram</td>
+                                        <td class="py-4 px-4 text-muted">08 Apr 2026</td>
+                                        <td class="py-4 px-4">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-info/10 text-info border border-info/20">
+                                                DIPROSES
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-right">
+                                            <button
+                                                class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                                                title="Lihat Detail">
+                                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <!-- Row 3: Selesai -->
+                                    <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="window.location='detailLaporan.html'">
+                                        <td class="py-4 px-4">
+                                            <p class="font-bold text-dark group-hover:text-primary transition-colors">
+                                                Lampu PJU Padam</p>
+                                            <div class="flex items-center text-muted mt-1 text-xs">
+                                                <i data-lucide="lightbulb-off" class="w-3.5 h-3.5 mr-1"></i>
+                                                Lampu Jalan Mati
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-4 text-muted">Jl. Udayana, Selaparang</td>
+                                        <td class="py-4 px-4 text-muted">01 Apr 2026</td>
+                                        <td class="py-4 px-4">
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">
+                                                SELESAI
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-right">
+                                            <button
+                                                class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                                                title="Lihat Detail">
+                                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Card View -->
+                        <div class="md:hidden flex flex-col divide-y divide-slate-100">
+                            <!-- Card 1 -->
+                            <div class="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer" onclick="window.location='detailLaporan.html'">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning uppercase tracking-wide">
+                                        Menunggu
+                                    </span>
+                                    <span class="text-xs text-muted">Hari ini, 08:30</span>
+                                </div>
+                                <h4 class="font-bold text-dark text-sm mb-1">Jalan Berlubang Dalam</h4>
+                                <div class="flex items-center text-xs text-muted mb-2">
+                                    <i data-lucide="road" class="w-3 h-3 mr-1"></i> Jalan Rusak
+                                </div>
+                                <div class="flex items-center text-xs text-muted">
+                                    <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> Jl. Pejanggik, Cakranegara
+                                </div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer" onclick="window.location='detailLaporan.html'">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info uppercase tracking-wide">
+                                        Diproses
+                                    </span>
+                                    <span class="text-xs text-muted">08 Apr 2026</span>
+                                </div>
+                                <h4 class="font-bold text-dark text-sm mb-1">Pohon Tumbang di Taman</h4>
+                                <div class="flex items-center text-xs text-muted mb-2">
+                                    <i data-lucide="tree-deciduous" class="w-3 h-3 mr-1"></i> Pohon Tumbang
+                                </div>
+                                <div class="flex items-center text-xs text-muted">
+                                    <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> Taman Sangkareang, Mataram
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script to handle Sidebar Mobile & Icons -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Sidebar Toggle Logic for Mobile
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            if (sidebar.classList.contains('-translate-x-full')) {
+                // Open Sidebar
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling background
+            } else {
+                // Close Sidebar
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Re-enable scrolling
+            }
+        }
+    </script>
+</body>
+
+</html>

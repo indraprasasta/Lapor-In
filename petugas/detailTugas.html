@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail & Update Tugas - Laporin Mataram</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config to match PRD Design System -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: { DEFAULT: '#2563EB', dark: '#1D4ED8' },
+                        secondary: '#059669',
+                        warning: '#D97706',
+                        danger: '#DC2626',
+                        info: '#0891B2',
+                        dark: '#1E293B',
+                        light: '#F8FAFC',
+                        muted: '#94A3B8',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F8FAFC;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+
+<body class="bg-light text-dark font-sans h-screen flex overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 bg-white w-64 border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-200">
+            <div class="bg-dark text-white p-1.5 rounded mr-2 flex items-center justify-center">
+                <i data-lucide="hard-hat" class="w-5 h-5"></i>
+            </div>
+            <span class="text-dark font-extrabold text-xl tracking-tight">Petugas<span
+                    class="text-primary">App</span></span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            <div class="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Menu Utama</div>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Beranda
+            </a>
+            <!-- Active Menu -->
+            <a href="#" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
+                <i data-lucide="clipboard-list" class="w-5 h-5 mr-3"></i>
+                Daftar Tugas
+                <span class="ml-auto bg-danger text-white text-[10px] font-bold px-2 py-0.5 rounded-full">2</span>
+            </a>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="history" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Riwayat Penanganan
+            </a>
+
+            <div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Pengaturan</div>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+                <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Profil Saya
+            </a>
+        </nav>
+
+        <!-- User Info -->
+        <div class="p-4 border-t border-slate-200">
+            <a href="#" class="flex items-center group">
+                <div
+                    class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold overflow-hidden border border-orange-200">
+                    <img src="https://ui-avatars.com/api/?name=Pak+Budi&background=ffedd5&color=ea580c" alt="Avatar"
+                        class="w-full h-full object-cover">
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">Pak Budi</p>
+                    <p class="text-xs text-muted">Dinas Pertamanan</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- Top Navbar -->
+        <header
+            class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-30 shrink-0">
+            <button
+                class="lg:hidden text-muted hover:text-dark p-2 -ml-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                onclick="toggleSidebar()">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <div class="hidden sm:block">
+                <nav class="flex text-sm text-muted font-medium">
+                    <a href="#" class="hover:text-dark">Dashboard</a>
+                    <span class="mx-2">/</span>
+                    <a href="#" class="hover:text-dark">Daftar Tugas</a>
+                    <span class="mx-2">/</span>
+                    <span class="text-dark">Detail & Update Tugas</span>
+                </nav>
+            </div>
+            <div class="flex items-center ml-auto">
+                <button
+                    class="relative p-2 text-muted hover:text-dark rounded-full hover:bg-slate-50 transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto bg-light p-4 sm:p-6 lg:p-8">
+            <div class="max-w-6xl mx-auto space-y-6">
+
+                <!-- Page Header & Actions -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div class="flex items-center">
+                        <button
+                            class="mr-4 p-2 rounded-lg hover:bg-slate-200 transition-colors text-slate-500 hover:text-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                            title="Kembali" onclick="history.back()">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        </button>
+                        <div>
+                            <div class="flex items-center gap-3 mb-1">
+                                <h2 class="text-2xl font-bold text-dark tracking-tight">Tugas #LP-20260408</h2>
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-info/10 text-info border border-info/20 uppercase tracking-wide">
+                                    Sedang Diproses
+                                </span>
+                            </div>
+                            <p class="text-[11px] font-bold text-danger uppercase flex items-center">
+                                <i data-lucide="alert-circle" class="w-3 h-3 mr-1"></i> Prioritas Tinggi
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <!-- Kolom Kiri: Detail Laporan Warga (2/3 width on LG) -->
+                    <div class="lg:col-span-2 space-y-6">
+
+                        <!-- Informasi Laporan -->
+                        <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                            <div
+                                class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                                <h3 class="font-bold text-dark flex items-center">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2 text-slate-500"></i> Informasi
+                                    Laporan Warga
+                                </h3>
+                            </div>
+                            <div class="p-6">
+                                <h4 class="text-lg font-bold text-dark mb-4">Pohon Tumbang Menutup Jalan</h4>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6 mb-6">
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                                            Pelapor</p>
+                                        <div class="flex items-center text-dark text-sm">
+                                            <div
+                                                class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-2 font-bold text-xs">
+                                                A
+                                            </div>
+                                            Andi (081234567890)
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                                            Waktu Pelaporan</p>
+                                        <p class="text-dark text-sm">08 Apr 2026, 09:15 WITA</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                                            Kategori</p>
+                                        <div class="flex items-center text-dark text-sm">
+                                            <i data-lucide="tree-deciduous" class="w-4 h-4 mr-1.5 text-slate-500"></i>
+                                            Pohon Tumbang
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                                            Kecamatan</p>
+                                        <p class="text-dark text-sm">Mataram</p>
+                                    </div>
+                                </div>
+
+                                <div class="mb-5">
+                                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                        Deskripsi Kerusakan</p>
+                                    <p
+                                        class="text-dark text-sm leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                        Terdapat pohon beringin tua yang tumbang akibat hujan angin lebat semalam.
+                                        Batang pohon cukup besar dan menutupi hampir seluruh akses jalan masuk menuju
+                                        area utara Taman Sangkareang. Mohon segera ditangani karena membahayakan
+                                        pengguna jalan dan merusak pagar taman.
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Alamat
+                                        Lengkap / Patokan Lokasi</p>
+                                    <div class="flex items-start">
+                                        <i data-lucide="map-pin" class="w-5 h-5 text-primary mt-0.5 mr-2 shrink-0"></i>
+                                        <p class="text-dark text-sm">Jl. Pejanggik, Taman Sangkareang Pintu Utara,
+                                            Mataram Barat, Kec. Mataram, Kota Mataram, Nusa Tenggara Bar.</p>
+                                    </div>
+                                    <!-- Tombol Buka di Maps -->
+                                    <button
+                                        class="mt-3 text-primary text-sm font-semibold hover:text-primary-dark flex items-center bg-primary/5 px-3 py-1.5 rounded-md transition-colors w-max">
+                                        <i data-lucide="external-link" class="w-4 h-4 mr-1.5"></i> Buka Titik Lokasi di
+                                        Maps
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Foto Bukti dari User -->
+                        <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+                            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                                <h3 class="font-bold text-dark text-sm">Foto Bukti dari Pelapor</h3>
+                            </div>
+                            <div class="p-6">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div
+                                        class="aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group relative">
+                                        <img src="https://images.unsplash.com/photo-1582298538104-efa9cb1023c4?q=80&w=600&auto=format&fit=crop"
+                                            alt="Foto Pohon Tumbang" class="w-full h-full object-cover">
+                                        <a href="#"
+                                            class="absolute inset-0 bg-dark/0 group-hover:bg-dark/30 flex items-center justify-center transition-colors">
+                                            <i data-lucide="zoom-in"
+                                                class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                        </a>
+                                    </div>
+                                    <div
+                                        class="aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group relative">
+                                        <img src="https://images.unsplash.com/photo-1545610842-45e05417ab75?q=80&w=600&auto=format&fit=crop"
+                                            alt="Foto Pohon Tumbang" class="w-full h-full object-cover">
+                                        <a href="#"
+                                            class="absolute inset-0 bg-dark/0 group-hover:bg-dark/30 flex items-center justify-center transition-colors">
+                                            <i data-lucide="zoom-in"
+                                                class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Kolom Kanan: Form Update Status (1/3 width on LG) -->
+                    <div class="space-y-6">
+                        <div
+                            class="bg-white border border-primary/20 rounded-lg shadow-md overflow-hidden relative stick top-24">
+                            <div class="absolute top-0 inset-x-0 h-1 bg-primary"></div>
+                            <div class="px-6 py-4 border-b border-slate-100">
+                                <h3 class="font-bold text-dark flex items-center text-lg">
+                                    <i data-lucide="check-square" class="w-5 h-5 mr-2 text-primary"></i> Update Status
+                                </h3>
+                                <p class="text-xs text-muted mt-1">Perbarui progress penanganan laporan.</p>
+                            </div>
+
+                            <form action="#" method="POST" class="p-6 space-y-5">
+
+                                <!-- Status Dropdown -->
+                                <div>
+                                    <label for="status" class="block text-sm font-semibold text-dark mb-2">Ubah
+                                        Status</label>
+                                    <div class="relative">
+                                        <select id="status" name="status" required
+                                            class="w-full pl-4 pr-10 py-2 appearance-none rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors text-sm bg-white">
+                                            <option value="diproses" selected>Sedang Diproses</option>
+                                            <option value="selesai">Selesai Ditangani</option>
+                                        </select>
+                                        <div
+                                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tanggal Penanganan -->
+                                <div>
+                                    <label for="tanggal" class="block text-sm font-semibold text-dark mb-2">Tanggal
+                                        Penanganan</label>
+                                    <input type="date" id="tanggal" name="tanggal" required value="2026-04-10"
+                                        class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors text-sm text-slate-700">
+                                </div>
+
+                                <!-- Upload Bukti Penanganan -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-dark mb-2">Foto Bukti
+                                        Penanganan</label>
+                                    <p class="text-xs text-muted mb-2">Upload foto Sebelum & Sesudah pengerjaan.</p>
+
+                                    <div
+                                        class="flex justify-center px-4 pt-4 pb-5 border-2 border-slate-300 border-dashed rounded-lg hover:border-primary/50 transition-colors cursor-pointer bg-slate-50 group">
+                                        <div class="space-y-1 text-center">
+                                            <i data-lucide="camera"
+                                                class="mx-auto h-8 w-8 text-slate-400 group-hover:text-primary transition-colors"></i>
+                                            <div class="flex text-xs text-slate-600 justify-center mt-2">
+                                                <label for="file-upload"
+                                                    class="relative cursor-pointer bg-transparent rounded-md font-medium text-primary hover:text-primary-dark">
+                                                    <span>Upload foto</span>
+                                                    <input id="file-upload" name="file-upload" type="file"
+                                                        class="sr-only" accept="image/jpeg, image/png" multiple>
+                                                </label>
+                                            </div>
+                                            <p class="text-[10px] text-muted">Maks. 3 foto (Format: JPG/PNG)</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Catatan Penanganan -->
+                                <div>
+                                    <label for="catatan" class="block text-sm font-semibold text-dark mb-2">Catatan
+                                        Penanganan</label>
+                                    <textarea id="catatan" name="catatan" rows="3"
+                                        placeholder="Tulis catatan pengerjaan di sini..." required
+                                        class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-colors text-sm resize-y"></textarea>
+                                </div>
+
+                                <!-- Tombol Simpan -->
+                                <button type="submit"
+                                    class="w-full bg-primary hover:bg-primary-dark text-white py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center justify-center">
+                                    <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Update
+                                </button>
+
+                            </form>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Sidebar Toggle Logic for Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+</body>
+
+</html>

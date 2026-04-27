@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategori Laporan - Laporin Admin</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config to match PRD Design System -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: { DEFAULT: '#2563EB', dark: '#1D4ED8' },
+                        secondary: '#059669',
+                        warning: '#D97706',
+                        danger: '#DC2626',
+                        info: '#0891B2',
+                        dark: '#1E293B',
+                        light: '#F8FAFC',
+                        muted: '#94A3B8',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F8FAFC;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        /* Modal Animation */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: all 0.2s ease-out;
+        }
+
+        .modal-exit {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.2s ease-in;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 text-dark font-sans h-screen flex overflow-hidden">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Admin -->
+    <aside id="sidebar"
+        class="fixed inset-y-0 left-0 bg-dark w-64 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
+        <div class="h-16 flex items-center px-6 bg-slate-900 border-b border-slate-800">
+            <i data-lucide="shield-check" class="text-primary w-6 h-6 mr-2"></i>
+            <span class="text-white font-extrabold text-xl tracking-tight">Laporin<span
+                    class="text-primary">Admin</span></span>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            <div class="px-3 mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">Dashboard</div>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="pie-chart" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Beranda Admin
+            </a>
+
+            <div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">Manajemen Data</div>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Data Laporan
+            </a>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="users" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Data Pengguna
+            </a>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="hard-hat" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Data Petugas
+            </a>
+            <!-- Active Menu -->
+            <a href="#"
+                class="flex items-center px-3 py-2.5 bg-primary/20 text-primary border border-primary/30 rounded-lg font-medium group transition-colors">
+                <i data-lucide="tags" class="w-5 h-5 mr-3"></i>
+                Kategori Laporan
+            </a>
+
+            <div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">Sistem</div>
+            <a href="#"
+                class="flex items-center px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg font-medium transition-colors group">
+                <i data-lucide="settings" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                Pengaturan
+            </a>
+        </nav>
+
+        <div class="p-4 bg-slate-900 border-t border-slate-800">
+            <div class="flex items-center">
+                <div
+                    class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold overflow-hidden border border-slate-600">
+                    <img src="https://ui-avatars.com/api/?name=Ibu+Sari&background=334155&color=fff" alt="Avatar"
+                        class="w-full h-full object-cover">
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-white">Ibu Sari</p>
+                    <p class="text-[10px] text-slate-400 font-mono">Dinas Kominfo</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <header
+            class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-30 shrink-0 shadow-sm">
+            <button class="lg:hidden text-muted hover:text-dark p-2 -ml-2 rounded-lg" onclick="toggleSidebar()">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <div class="hidden sm:block">
+                <nav class="flex text-sm text-muted font-medium items-center">
+                    <a href="#" class="hover:text-dark">Manajemen Data</a>
+                    <i data-lucide="chevron-right" class="w-4 h-4 mx-1"></i>
+                    <span class="text-dark">Kategori Laporan</span>
+                </nav>
+            </div>
+            <div class="flex items-center ml-auto">
+                <button
+                    class="relative p-2 text-muted hover:text-dark rounded-full hover:bg-slate-50 transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-6 lg:p-8 relative">
+            <div class="max-w-5xl mx-auto space-y-6">
+
+                <!-- Page Header & Actions -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-dark tracking-tight">Kategori Infrastruktur</h2>
+                        <p class="text-muted mt-1 text-sm">Kelola pilihan kategori kerusakan yang dapat dipilih warga
+                            saat melapor.</p>
+                    </div>
+                    <button onclick="openModal('modalTambah')"
+                        class="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Kategori
+                    </button>
+                </div>
+
+                <!-- Main Grid (Cards) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Kategori 1 -->
+                    <div
+                        class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden hover:border-primary/30 transition-colors relative group">
+                        <div
+                            class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openModal('modalEdit')"
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-primary rounded shadow-sm"
+                                title="Edit">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-danger rounded shadow-sm"
+                                title="Nonaktifkan">
+                                <i data-lucide="power-off" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-blue-50 text-primary flex items-center justify-center mb-4 border border-blue-100">
+                                <i data-lucide="road" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-dark mb-1">Jalan Rusak</h3>
+                            <p class="text-xs text-muted mb-4 line-clamp-2">Laporan terkait jalan berlubang, aspal
+                                terkelupas, atau kerusakan trotoar.</p>
+
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
+                                    AKTIF
+                                </span>
+                                <span class="text-xs font-semibold text-slate-500">
+                                    <i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i> 450 Laporan
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kategori 2 -->
+                    <div
+                        class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden hover:border-primary/30 transition-colors relative group">
+                        <div
+                            class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openModal('modalEdit')"
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-primary rounded shadow-sm"
+                                title="Edit">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-danger rounded shadow-sm"
+                                title="Nonaktifkan">
+                                <i data-lucide="power-off" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 border border-emerald-100">
+                                <i data-lucide="tree-deciduous" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-dark mb-1">Pohon Tumbang</h3>
+                            <p class="text-xs text-muted mb-4 line-clamp-2">Laporan pohon tumbang atau dahan patah yang
+                                membahayakan/menutupi jalan.</p>
+
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
+                                    AKTIF
+                                </span>
+                                <span class="text-xs font-semibold text-slate-500">
+                                    <i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i> 180 Laporan
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kategori 3 -->
+                    <div
+                        class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden hover:border-primary/30 transition-colors relative group">
+                        <div
+                            class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openModal('modalEdit')"
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-primary rounded shadow-sm"
+                                title="Edit">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-danger rounded shadow-sm"
+                                title="Nonaktifkan">
+                                <i data-lucide="power-off" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center mb-4 border border-amber-100">
+                                <i data-lucide="lightbulb-off" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-dark mb-1">Lampu Jalan Mati</h3>
+                            <p class="text-xs text-muted mb-4 line-clamp-2">Lampu PJU padam, kedap-kedip, atau tiang
+                                listrik yang membahayakan.</p>
+
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
+                                    AKTIF
+                                </span>
+                                <span class="text-xs font-semibold text-slate-500">
+                                    <i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i> 320 Laporan
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kategori 4 -->
+                    <div
+                        class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden hover:border-primary/30 transition-colors relative group">
+                        <div
+                            class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openModal('modalEdit')"
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-primary rounded shadow-sm"
+                                title="Edit">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-danger rounded shadow-sm"
+                                title="Nonaktifkan">
+                                <i data-lucide="power-off" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center mb-4 border border-cyan-100">
+                                <i data-lucide="droplets" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-dark mb-1">Saluran Air / Drainase</h3>
+                            <p class="text-xs text-muted mb-4 line-clamp-2">Gorong-gorong mampet, genangan air/banjir,
+                                atau tutup got hilang.</p>
+
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
+                                    AKTIF
+                                </span>
+                                <span class="text-xs font-semibold text-slate-500">
+                                    <i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i> 185 Laporan
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kategori 5 (Nonaktif) -->
+                    <div
+                        class="bg-slate-50 border border-slate-200 rounded-xl shadow-sm overflow-hidden opacity-75 relative group">
+                        <div
+                            class="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openModal('modalEdit')"
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-primary rounded shadow-sm"
+                                title="Edit">
+                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                            </button>
+                            <button
+                                class="p-1.5 bg-white border border-slate-200 text-slate-500 hover:text-secondary rounded shadow-sm"
+                                title="Aktifkan">
+                                <i data-lucide="power" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="p-6 grayscale">
+                            <div
+                                class="w-12 h-12 rounded-lg bg-slate-200 text-slate-500 flex items-center justify-center mb-4 border border-slate-300">
+                                <i data-lucide="wind" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-600 mb-1">Polusi Udara</h3>
+                            <p class="text-xs text-slate-500 mb-4 line-clamp-2">Laporan terkait pembakaran sampah
+                                terbuka atau pabrik berpolusi tinggi.</p>
+
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-200">
+                                <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-danger/10 text-danger border border-danger/20">
+                                    NONAKTIF
+                                </span>
+                                <span class="text-xs font-semibold text-slate-500">
+                                    <i data-lucide="file-text" class="w-3 h-3 inline mr-1"></i> 12 Laporan
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: Tambah Kategori -->
+    <div id="modalTambah" class="fixed inset-0 z-[100] hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-dark/60 backdrop-blur-sm transition-opacity"
+            onclick="closeModal('modalTambah')"></div>
+
+        <!-- Modal Content -->
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div class="relative bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-md w-full modal-enter"
+                id="modalTambahContent">
+                <div class="bg-white px-6 pt-5 pb-6">
+                    <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
+                        <h3 class="text-lg leading-6 font-bold text-dark">Tambah Kategori Baru</h3>
+                        <button onclick="closeModal('modalTambah')" class="text-slate-400 hover:text-slate-500">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+
+                    <form action="#" method="POST" class="space-y-4">
+                        <div>
+                            <label for="namaKategori" class="block text-sm font-semibold text-dark mb-1">Nama Kategori
+                                <span class="text-danger">*</span></label>
+                            <input type="text" id="namaKategori" placeholder="Contoh: Fasilitas Umum" required
+                                class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm">
+                        </div>
+
+                        <div>
+                            <label for="iconKategori" class="block text-sm font-semibold text-dark mb-1">Ikon (Lucide
+                                Icon Name) <span class="text-danger">*</span></label>
+                            <div class="flex gap-2">
+                                <input type="text" id="iconKategori" placeholder="Contoh: building" required
+                                    class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm">
+                                <div class="w-10 h-10 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center shrink-0 text-slate-500"
+                                    title="Preview Icon">
+                                    <i data-lucide="image" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-muted mt-1">Cari nama ikon di: <a
+                                    href="https://lucide.dev/icons/" target="_blank"
+                                    class="text-primary hover:underline">lucide.dev</a></p>
+                        </div>
+
+                        <div>
+                            <label for="deskripsiKategori" class="block text-sm font-semibold text-dark mb-1">Deskripsi
+                                Singkat</label>
+                            <textarea id="deskripsiKategori" rows="3"
+                                placeholder="Jelaskan cakupan laporan untuk kategori ini..."
+                                class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-y"></textarea>
+                        </div>
+
+                        <div class="pt-2">
+                            <label class="flex items-center cursor-pointer">
+                                <div class="relative">
+                                    <input type="checkbox" class="sr-only" checked>
+                                    <div
+                                        class="block bg-slate-200 w-10 h-6 rounded-full transition-colors peer-checked:bg-primary">
+                                    </div>
+                                    <div
+                                        class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform peer-checked:translate-x-4">
+                                    </div>
+                                </div>
+                                <div class="ml-3 text-sm font-medium text-dark">Status Langsung Aktif</div>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="bg-slate-50 px-6 py-4 flex flex-row-reverse rounded-b-xl border-t border-slate-200">
+                    <button type="button"
+                        class="w-full sm:w-auto inline-flex justify-center rounded-lg border border-transparent px-4 py-2 bg-primary text-base font-medium text-white shadow-sm hover:bg-primary-dark focus:outline-none sm:ml-3 sm:text-sm transition-colors">
+                        Simpan Kategori
+                    </button>
+                    <button type="button" onclick="closeModal('modalTambah')"
+                        class="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center rounded-lg border border-slate-300 px-4 py-2 bg-white text-base font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none sm:text-sm transition-colors">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Sidebar Toggle Logic
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Modal Logic
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const modalContent = modal.querySelector('.modal-enter');
+
+            modal.classList.remove('hidden');
+
+            // Allow display block to render before triggering transition
+            setTimeout(() => {
+                modalContent.classList.remove('modal-enter');
+                modalContent.classList.add('modal-enter-active');
+            }, 10);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const modalContent = modal.querySelector('.modal-enter-active') || modal.children[1].children[0];
+
+            modalContent.classList.remove('modal-enter-active');
+            modalContent.classList.add('modal-exit-active');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modalContent.classList.remove('modal-exit-active');
+                modalContent.classList.add('modal-enter'); // reset for next open
+            }, 200); // match transition duration
+        }
+
+        // Add minimal CSS for the toggle switch dot in modal
+        const style = document.createElement('style');
+        style.textContent = `
+            input:checked ~ .dot { transform: translateX(100%); }
+            input:checked ~ .block { background-color: #2563EB; }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>
