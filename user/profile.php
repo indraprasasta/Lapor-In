@@ -103,18 +103,18 @@ $user    = mysqli_fetch_assoc($query);
                 <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Beranda
             </a>
-            <a href="buatLaporan.html"
+            <a href="buatLaporan.php"
                 class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="plus-circle" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Buat Laporan
             </a>
-            <a href="daftarLaporan.html"
+            <a href="daftarLaporan.php"
                 class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Laporan Saya
             </a>
             <!-- Menu Profil Aktif -->
-            <a href="#" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
+            <a href="profile.php" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
                 <i data-lucide="user" class="w-5 h-5 mr-3"></i>
                 Profil
             </a>
@@ -122,7 +122,7 @@ $user    = mysqli_fetch_assoc($query);
 
         <!-- User Info -->
         <div class="p-4 border-t border-slate-200">
-            <a href="#" class="flex items-center group">
+            <a href="profile.php" class="flex items-center group">
                 <div
                     class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
                     <img src="https://ui-avatars.com/api/?name=Pak+Andi&background=A3B18A&color=ffffff" alt="Avatar"
@@ -132,6 +132,11 @@ $user    = mysqli_fetch_assoc($query);
                     <p class="text-sm font-semibold text-dark"><?php echo $user['nama']; ?></p>
                     <p class="text-xs text-muted">Masyarakat</p>
                 </div>
+            </a>
+            <a href="logout.php"
+                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                Keluar
             </a>
         </div>
     </aside>
@@ -184,12 +189,18 @@ $user    = mysqli_fetch_assoc($query);
                             <!-- Foto Profil -->
                             <div class="relative inline-block mt-4 mb-4">
                                 <div class="w-32 h-32 rounded-full border-4 border-slate-50 overflow-hidden shadow-lg mx-auto">
-                                    <img src="<?php echo 'https://ui-avatars.com/api/?name=' . urlencode($user['nama']) . '&background=A3B18A&color=ffffff&size=200'; ?>" 
+                                <?php if(!empty($user['foto'])): ?>
+                                <img id="preview_foto" src="../uploads/foto_profil/<?php echo $user['foto']; ?>" 
+                                alt="Foto Profil" class="w-full h-full object-cover">
+                                    <?php else: ?>
+                                        <img id="preview_foto" src="<?php echo 'https://ui-avatars.com/api/?name=' . urlencode($user['nama']) . '&background=A3B18A&color=ffffff&size=200'; ?>" 
                                     alt="Avatar Profil" class="w-full h-full object-cover">
+                                    <?php endif; ?>
                                 </div>
-                                <button class="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-md hover:bg-accent transition-colors border-2 border-white" title="Ubah Foto">
+                                    <!-- Label pengganti button -->
+                                    <label for="foto_input" class="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-md hover:bg-accent transition-colors border-2 border-white cursor-pointer" title="Ubah Foto">
                                     <i data-lucide="camera" class="w-4 h-4"></i>
-                                </button>
+                                    </label>
                             </div>
 
                             <h3 class="text-xl font-bold text-dark"><?php echo $user['nama']; ?></h3>
@@ -208,12 +219,6 @@ $user    = mysqli_fetch_assoc($query);
                                     </div>
                                     <span>+62 812-3456-7890</span>
                                 </div>
-                                <div class="flex flex-col gap-2 mt-6">
-                                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Akun</span>
-                                    <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-bold bg-accent/20 text-primary border border-accent/30 w-full">
-                                        <i data-lucide="shield-check" class="w-4 h-4 mr-1.5"></i> Terverifikasi
-                                    </span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -225,8 +230,8 @@ $user    = mysqli_fetch_assoc($query);
                             <!-- Form Info Personal -->
                             <div class="p-6 sm:p-8">
                                 <h3 class="text-lg font-bold text-dark border-b border-slate-100 pb-4 mb-6">Informasi Pribadi</h3>
-                                
-                                <form action="#" method="POST" class="space-y-6">
+                                <form action="proses_profil.php" method="POST" enctype="multipart/form-data" class="space-y-6">
+                                    <input type="file" id="foto_input" name="foto" accept="image/*" class="hidden" onchange="previewFoto(this)">      
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                         <!-- Nama Lengkap -->
                                         <div>
@@ -276,9 +281,6 @@ $user    = mysqli_fetch_assoc($query);
                                             <div class="relative">
                                                 <input type="password" id="new_password" name="new_password" placeholder="Biarkan kosong jika tidak diubah"
                                                     class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-accent outline-none transition-colors text-sm text-dark">
-                                                <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary">
-                                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                                </button>
                                             </div>
                                         </div>
 
@@ -336,6 +338,16 @@ $user    = mysqli_fetch_assoc($query);
                 document.body.style.overflow = 'auto';
             }
         }
+
+        function previewFoto(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview_foto').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
     </script>
 </body>
 

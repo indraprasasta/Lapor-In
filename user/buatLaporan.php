@@ -1,3 +1,68 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+
+require __DIR__ . '/../database/conection.php';
+
+$user_id = $_SESSION['user_id'];
+
+$query_user = mysqli_query($koneksi, "SELECT * FROM users WHERE id = '$user_id'");
+$user       = mysqli_fetch_assoc($query_user);
+$pesan_error = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+    $judul     = mysqli_real_escape_string($koneksi, $_POST['judul']);
+    $kategori  = mysqli_real_escape_string($koneksi, $_POST['kategori']);
+    $deskripsi = mysqli_real_escape_string($koneksi, $_POST['deskripsi']);
+    $alamat    = mysqli_real_escape_string($koneksi, $_POST['alamat']);
+    $kecamatan = mysqli_real_escape_string($koneksi, $_POST['kecamatan']);
+    $kelurahan = mysqli_real_escape_string($koneksi, $_POST['kelurahan']);
+    $latitude  = mysqli_real_escape_string($koneksi, $_POST['latitude']);
+    $longitude = mysqli_real_escape_string($koneksi, $_POST['longitude']);
+
+    // Upload foto
+    $nama_foto = "";
+    if (!empty($_FILES['file_upload']['name'][0])) {
+        $folder      = __DIR__ . '/../uploads/foto_laporan/';
+        $nama_foto   = time() . '_' . $_FILES['file_upload']['name'][0];
+        $tipe_file   = $_FILES['file_upload']['type'][0];
+        $ukuran_file = $_FILES['file_upload']['size'][0];
+
+        $tipe_allowed = ['image/jpeg', 'image/png', 'image/jpg'];
+
+        if (!in_array($tipe_file, $tipe_allowed)) {
+            $pesan_error = "Format foto tidak didukung!";
+        } elseif ($ukuran_file > 5 * 1024 * 1024) {
+            $pesan_error = "Ukuran foto maksimal 5MB!";
+        } else {
+            move_uploaded_file($_FILES['file_upload']['tmp_name'][0], $folder . $nama_foto);
+        }
+    }
+
+    if ($pesan_error == "") {
+        $query = "INSERT INTO laporan (user_id, judul, kategori, deskripsi, foto, alamat, kecamatan, kelurahan, latitude, longitude)
+                VALUES ('$user_id', '$judul', '$kategori', '$deskripsi', '$nama_foto', '$alamat', '$kecamatan', '$kelurahan', '$latitude', '$longitude')";
+
+        if (mysqli_query($koneksi, $query)) {
+            echo "<script>
+                alert('Laporan berhasil dikirim!');
+                window.location.href = 'daftarLaporan.php';
+            </script>";
+            exit();
+        } else {
+            $pesan_error = "Gagal menyimpan laporan: " . mysqli_error($koneksi);
+        }
+    }
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -89,21 +154,21 @@
 
         <!-- Navigation -->
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="beranda.html"
+            <a href="beranda.php"
                 class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Beranda
             </a>
-            <a href="#" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
+            <a href="buatLaporan.php" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
                 <i data-lucide="plus-circle" class="w-5 h-5 mr-3"></i>
                 Buat Laporan
             </a>
-            <a href="daftarLaporan.html"
+            <a href="daftarLaporan.php"
                 class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Laporan Saya
             </a>
-            <a href="#"
+            <a href="profile.php"
                 class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Profil
@@ -119,9 +184,14 @@
                         class="w-full h-full object-cover">
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">Pak Andi</p>
+                    <p class="text-sm font-semibold text-dark"><?php echo $user['nama']; ?></p>
                     <p class="text-xs text-muted">Masyarakat</p>
                 </div>
+            </a>
+            <a href="logout.php"
+                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                Keluar
             </a>
         </div>
     </aside>
@@ -158,8 +228,7 @@
 
                 <!-- Form Card: Dikembalikan ke warna putih bersih -->
                 <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden">
-                    <form action="#" method="POST" class="p-6 sm:p-8 space-y-6">
-
+                    <form action="" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
                         <!-- Judul Laporan -->
                         <div>
                             <label for="judul" class="block text-sm font-semibold text-dark mb-2">Judul Laporan <span
@@ -179,14 +248,14 @@
                                 <select id="kategori" name="kategori" required
                                     class="w-full pl-4 pr-10 py-2.5 appearance-none rounded-lg border border-slate-300 focus:ring-2 focus:ring-accent outline-none transition-colors text-sm bg-white">
                                     <option value="" disabled selected>Pilih Kategori Kerusakan</option>
-                                    <option value="1">Jalan Rusak</option>
-                                    <option value="2">Pohon Tumbang</option>
-                                    <option value="3">Lampu Jalan Mati</option>
-                                    <option value="4">Saluran Air</option>
-                                    <option value="5">Jembatan</option>
-                                    <option value="6">Trotoar</option>
-                                    <option value="7">Fasilitas Umum</option>
-                                    <option value="8">Lainnya</option>
+                                    <option value="Jalan Rusak">Jalan Rusak</option>
+                                    <option value="Pohon Tumbang">Pohon Tumbang</option>
+                                    <option value="Lampu Jalan Mati">Lampu Jalan Mati</option>
+                                    <option value="Saluran Air">Saluran Air</option>
+                                    <option value="Jembatan">Jembatan</option>
+                                    <option value="Trotoar">Trotoar</option>
+                                    <option value="Fasilitas Umum">Fasilitas Umum</option>
+                                    <option value="Lainnya">Lainnya</option>
                                 </select>
                                 <div
                                     class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
@@ -217,9 +286,9 @@
                                     <div class="flex text-sm text-slate-600 justify-center mt-2">
                                         <label for="file-upload"
                                             class="relative cursor-pointer bg-transparent rounded-md font-medium text-primary hover:text-primary-dark focus-within:outline-none focus-within:ring-2 focus-within:ring-primary">
-                                            <span>Upload file</span>
-                                            <input id="file-upload" name="file-upload" type="file" class="sr-only"
-                                                accept="image/jpeg, image/png" multiple>
+                                            <span>Upload  file</span>
+                                            <input id="file-upload" name="file_upload[]" type="file" class="sr-only"
+                                            accept="image/jpeg, image/png" multiple>
                                         </label>
                                         <p class="pl-1">atau drag and drop</p>
                                     </div>

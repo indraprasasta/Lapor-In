@@ -91,7 +91,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
         <!-- Container -->
-        <div class="w-full max-w-[380px] bg-gradient-to-t from-[#eef2f0] to-white rounded-[40px] p-8 border-[5px] border-white shadow-[0_30px_30px_-20px_rgba(58,90,64,0.3)]">
+        <div class="w-full max-w-[380px] bg-gradient-to-t from-[#eef2f0] to-white rounded-[40px] p-8 border-[5px] border-white shadow-[0_30px_30px_-20px_rgba(58,90,64,0.3)] relative">
+
+        <a href="index.php" 
+        class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors">
+        <i class="fa-solid fa-xmark text-sm"></i>
+        </a>
             
             <!-- Header -->
             <div class="text-center font-bold text-3xl text-primary mb-8 tracking-tight">
@@ -139,7 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
 
                 <!-- Submit Button -->
-                <button 
+                <button
                     class="block w-full font-bold bg-primary text-white py-4 mt-8 rounded-[20px] shadow-[0_20px_10px_-15px_rgba(58,90,64,0.4)] border-none transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_23px_10px_-20px_rgba(58,90,64,0.5)] hover:bg-opacity-90 active:scale-95 cursor-pointer" 
                     type="submit">
                     Sign In

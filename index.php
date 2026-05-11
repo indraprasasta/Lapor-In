@@ -1,3 +1,10 @@
+<?php
+require __DIR__ . '/database/conection.php';
+
+// Ambil 3 berita terbaru
+$query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DESC LIMIT 3");
+?>
+
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
@@ -296,7 +303,7 @@
                     <p class="text-sm text-gray-600">Cantumkan tanggal & jam pantauan Anda.</p>
                 </div>
                 <div class="relative z-10">
-                    <div class="w-16 h-16 bg-white border-4 border-primary rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white bg-primary shadow-lg"><i class="fa-solid fa-check"></i></div>
+                    <div class="w-16 h-16 bg-primary border-4 border-primary rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white bg-primary shadow-lg"><i class="fa-solid fa-check"></i></div>
                     <h4 class="font-bold text-primary mb-2">Selesai</h4>
                     <p class="text-sm text-gray-600">Laporan diverifikasi & diteruskan ke dinas.</p>
                 </div>
@@ -356,38 +363,37 @@
                 </div>
                 <a href="#" class="hidden md:block text-accent hover:text-primary font-semibold">Lihat Semua Berita <i class="fa-solid fa-arrow-right ml-1"></i></a>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Blog 1 -->
-                <article class="bg-white rounded-2xl overflow-hidden shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=600&q=80" alt="Blog" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-xs text-accent font-semibold mb-2">INFRASTRUKTUR</div>
-                        <h3 class="font-bold text-primary text-xl mb-3 hover:text-accent cursor-pointer">Pemkot Mataram Anggarkan Dana Ekstra untuk Perbaikan Jalan Provinsi</h3>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">Pemerintah merespon tingginya laporan dari masyarakat di kuartal pertama dengan mempercepat pencairan dana perbaikan jalan.</p>
-                        <a href="#" class="text-primary text-sm font-bold hover:text-accent">Baca Selengkapnya &rarr;</a>
-                    </div>
-                </article>
-                <!-- Blog 2 -->
-                <article class="bg-white rounded-2xl overflow-hidden shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1542361345-89e58247f2d5?auto=format&fit=crop&w=600&q=80" alt="Blog" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-xs text-accent font-semibold mb-2">LINGKUNGAN</div>
-                        <h3 class="font-bold text-primary text-xl mb-3 hover:text-accent cursor-pointer">Antisipasi Cuaca Ekstrem, Ratusan Pohon Tua Dipangkas</h3>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">DLH Kota Mataram mengintensifkan pemangkasan ranting di area protokol untuk mencegah pohon tumbang akibat angin kencang.</p>
-                        <a href="#" class="text-primary text-sm font-bold hover:text-accent">Baca Selengkapnya &rarr;</a>
-                    </div>
-                </article>
-                <!-- Blog 3 -->
-                <article class="bg-white rounded-2xl overflow-hidden shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1522881113590-b1ff854bf763?auto=format&fit=crop&w=600&q=80" alt="Blog" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="text-xs text-accent font-semibold mb-2">TEKNOLOGI</div>
-                        <h3 class="font-bold text-primary text-xl mb-3 hover:text-accent cursor-pointer">LaporIn Catat Rekor 1.000 Laporan Warga Diselesaikan</h3>
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">Aplikasi LaporIn terbukti efektif menjembatani aspirasi warga. Tingkat keberhasilan perbaikan kini mencapai 92% di Mataram.</p>
-                        <a href="#" class="text-primary text-sm font-bold hover:text-accent">Baca Selengkapnya &rarr;</a>
-                    </div>
-                </article>
+                <?php if(mysqli_num_rows($query_berita) > 0): ?>
+                    <?php while($berita = mysqli_fetch_assoc($query_berita)): ?>
+                    <article class="bg-white rounded-2xl overflow-hidden shadow-sm">
+                        <?php if(!empty($berita['foto'])): ?>
+                        <img src="uploads/foto_berita/<?php echo $berita['foto']; ?>" 
+                            alt="<?php echo $berita['judul']; ?>" class="w-full h-48 object-cover">
+                        <?php else: ?>
+                        <div class="w-full h-48 bg-slate-200 flex items-center justify-center">
+                            <span class="text-slate-400 text-sm">Tidak ada foto</span>
+                        </div>
+                        <?php endif; ?>
+                        <div class="p-6">
+                            <div class="text-xs text-accent font-semibold mb-2 uppercase">
+                                <?php echo $berita['kategori']; ?>
+                            </div>
+                            <h3 class="font-bold text-primary text-xl mb-3 hover:text-accent cursor-pointer">
+                                <?php echo $berita['judul']; ?>
+                            </h3>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                                <?php echo substr(strip_tags($berita['isi']), 0, 150) . '...'; ?>
+                            </p>
+                            <a href="#" class="text-primary text-sm font-bold hover:text-accent">
+                                Baca Selengkapnya &rarr;
+                            </a>
+                        </div>
+                    </article>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p class="text-gray-400 col-span-3 text-center py-8">Belum ada berita tersedia.</p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -409,9 +415,9 @@
             <p class="text-accent text-lg max-w-2xl mx-auto mb-10">
                 Siapkan foto bukti, alamat lengkap, deskripsi singkat, serta tanggal dan waktu kejadian. Mari bersinergi membangun kota ini.
             </p>
-            <button class="bg-white text-primary px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 hover:shadow-xl transition-all inline-flex items-center gap-3">
-                <i class="fa-solid fa-file-pen"></i> Menuju Formulir Pengaduan
-            </button>
+            <a href="login.php" class="bg-white text-primary px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100    hover:shadow-xl transition-all inline-flex items-center gap-3">
+            <i class="fa-solid fa-file-pen"></i> Menuju Formulir Pengaduan
+            </a>
         </div>
     </section>
 
@@ -549,6 +555,9 @@
                     <a href="#" class="hover:text-white">Kebijakan Privasi</a>
                     <span class="text-gray-600">|</span>
                     <a href="#" class="hover:text-white">Syarat Ketentuan</a>
+                    <a href="admin/login.php" class="text-gray-400 hover:text-white">
+                        Portal Admin
+                    </a>
                 </div>
             </div>
         </div>

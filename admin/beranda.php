@@ -1,3 +1,45 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$admin_nama = $_SESSION['admin_nama'];
+
+require __DIR__ . '/../database/conection.php';
+
+$total      = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan"))['total'];
+$hari_ini   = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE DATE(tanggal) = CURDATE()"))['total'];
+$menunggu   = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE status = 'Menunggu'"))['total'];
+$diproses   = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE status = 'Diproses'"))['total'];
+$selesai    = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE status = 'Selesai'"))['total'];
+$ditolak    = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE status = 'Ditolak'"))['total'];
+
+// Laporan terbaru 4 data
+$query_terbaru = mysqli_query($koneksi, "
+    SELECT laporan.*, users.nama as nama_pelapor 
+    FROM laporan 
+    JOIN users ON laporan.user_id = users.id 
+    ORDER BY laporan.tanggal DESC 
+    LIMIT 4
+");
+
+// Data per kecamatan untuk chart
+$query_kecamatan = mysqli_query($koneksi, "
+    SELECT kecamatan, COUNT(*) as total 
+    FROM laporan 
+    GROUP BY kecamatan 
+    ORDER BY total DESC
+");
+$kecamatan_labels = [];
+$kecamatan_data   = [];
+while($row = mysqli_fetch_assoc($query_kecamatan)) {
+    $kecamatan_labels[] = $row['kecamatan'];
+    $kecamatan_data[]   = $row['total'];
+}
+?>
 <!doctype html>
 <html lang="id">
   <head>
@@ -133,11 +175,11 @@
           >
         </a>
         <a
-          href="#"
+          href="buatBerita.php"
           class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
         >
           <i
-            data-lucide="users"
+            data-lucide="plus-circle"
             class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
           ></i>
           Buat Berita
@@ -193,20 +235,16 @@
             />
           </div>
           <div class="ml-3">
-            <p
-              class="text-sm font-semibold text-dark group-hover:text-primary transition-colors"
-            >
-              Ibu Sari
-            </p>
-            <p class="text-[10px] text-muted font-mono">Dinas Kominfo</p>
+           <!-- Nama admin -->
+            <p class="text-sm font-semibold text-dark"><?php echo $admin_nama; ?></p>
+            <p class="text-[10px] text-muted font-mono">Admin</p>
           </div>
         </div>
-        <button
-          class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors"
-        >
-          <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
-          Keluar
-        </button>
+        <a href="logout.php"
+                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                Keluar
+            </a>
       </div>
     </aside>
 
@@ -226,27 +264,6 @@
           <h1 class="text-lg font-bold text-dark">
             Ringkasan Sistem Pelaporan
           </h1>
-        </div>
-        <div class="flex items-center ml-auto space-x-3">
-          <div
-            class="hidden sm:flex items-center text-sm font-medium text-dark bg-white/50 px-3 py-1.5 rounded-full"
-          >
-            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>
-            10 April 2026
-          </div>
-          <button
-            class="relative p-2 text-dark hover:text-primary rounded-full hover:bg-white/50 transition-colors"
-          >
-            <i data-lucide="bell" class="w-5 h-5"></i>
-            <span class="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-              <span
-                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-danger opacity-75"
-              ></span>
-              <span
-                class="relative inline-flex rounded-full h-2.5 w-2.5 bg-danger ring-2 ring-white"
-              ></span>
-            </span>
-          </button>
         </div>
       </header>
 
@@ -270,15 +287,12 @@
               class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"
             >
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-semibold text-slate-500 uppercase">
-                  Total Keseluruhan
-                </p>
+                <p class="text-2xl font-bold text-dark"><?php echo $total; ?></p>
+                
                 <i data-lucide="layers" class="w-4 h-4 text-primary"></i>
               </div>
-              <p class="text-2xl font-bold text-dark">1,248</p>
-              <p class="text-xs text-secondary font-medium mt-1">
-                <i data-lucide="trending-up" class="w-3 h-3 inline"></i> +12%
-                bln ini
+              <p class="text-xs text-muted font-medium mt-1">
+                Total Laporan
               </p>
             </div>
 
@@ -287,12 +301,9 @@
               class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"
             >
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-semibold text-slate-500 uppercase">
-                  Laporan Hari Ini
-                </p>
+                <p class="text-2xl font-bold text-dark"><?php echo $hari_ini; ?></p>
                 <i data-lucide="calendar-plus" class="w-4 h-4 text-primary"></i>
               </div>
-              <p class="text-2xl font-bold text-dark">24</p>
               <p class="text-xs text-muted font-medium mt-1">
                 Laporan masuk hari ini
               </p>
@@ -303,14 +314,11 @@
               class="bg-white p-4 rounded-xl border border-warning/30 shadow-sm bg-warning/5"
             >
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-semibold text-warning uppercase">
-                  Menunggu
-                </p>
+                <p class="text-2xl font-bold text-warning"><?php echo $menunggu; ?></p>
                 <i data-lucide="clock" class="w-4 h-4 text-warning"></i>
               </div>
-              <p class="text-2xl font-bold text-warning">15</p>
               <p class="text-xs text-warning/80 font-medium mt-1">
-                Perlu direview
+                Menunggu validasi
               </p>
             </div>
 
@@ -319,15 +327,12 @@
               class="bg-white p-4 rounded-xl border border-info/30 shadow-sm bg-info/5"
             >
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-semibold text-info uppercase">
-                  Diproses
-                </p>
+                <p class="text-2xl font-bold text-info"><?php echo $diproses; ?></p>
                 <i
                   data-lucide="settings"
                   class="w-4 h-4 text-info animate-[spin_3s_linear_infinite]"
                 ></i>
               </div>
-              <p class="text-2xl font-bold text-info">42</p>
               <p class="text-xs text-info/80 font-medium mt-1">
                 Sedang ditangani
               </p>
@@ -338,15 +343,12 @@
               class="bg-white p-4 rounded-xl border border-secondary/30 shadow-sm bg-secondary/5"
             >
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-semibold text-secondary uppercase">
-                  Selesai
-                </p>
+                <p class="text-2xl font-bold text-secondary"><?php echo $selesai; ?></p>
                 <i
                   data-lucide="check-circle"
                   class="w-4 h-4 text-secondary"
                 ></i>
               </div>
-              <p class="text-2xl font-bold text-secondary">1,124</p>
               <p class="text-xs text-secondary/80 font-medium mt-1">
                 Telah diselesaikan
               </p>
@@ -357,12 +359,9 @@
               class="bg-white p-4 rounded-xl border border-danger/30 shadow-sm bg-danger/5"
             >
               <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-semibold text-danger uppercase">
-                  Ditolak
-                </p>
+                <p class="text-2xl font-bold text-danger"><?php echo $ditolak; ?></p>
                 <i data-lucide="x-circle" class="w-4 h-4 text-danger"></i>
               </div>
-              <p class="text-2xl font-bold text-danger">43</p>
               <p class="text-xs text-danger/80 font-medium mt-1">
                 Tidak valid/Duplikat
               </p>
@@ -417,129 +416,45 @@
                       <th class="py-3 px-5 text-right font-semibold">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody class="text-sm divide-y divide-slate-100 bg-white">
-                    <tr class="hover:bg-slate-50 transition-colors">
-                      <td class="py-3 px-5 font-mono text-xs text-slate-500">
-                        #LP-20260410-01
-                      </td>
-                      <td class="py-3 px-5">
-                        <p class="font-bold text-dark mb-0.5">
-                          Lampu Jalan Padam
-                        </p>
-                        <p class="text-xs text-muted">
-                          <i
-                            data-lucide="lightbulb-off"
-                            class="w-3 h-3 inline mr-1"
-                          ></i>
-                          Lampu Jalan Mati
-                        </p>
-                      </td>
-                      <td class="py-3 px-5 text-muted">Rina S.</td>
-                      <td class="py-3 px-5">
-                        <span
-                          class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning border border-warning/20"
-                          >MENUNGGU</span
-                        >
-                      </td>
-                      <td class="py-3 px-5 text-right">
-                        <button
-                          class="bg-primary text-white text-xs px-3 py-1.5 rounded font-semibold hover:bg-primary-dark shadow-sm"
-                        >
-                          Assign Petugas
-                        </button>
-                      </td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition-colors">
-                      <td class="py-3 px-5 font-mono text-xs text-slate-500">
-                        #LP-20260410-02
-                      </td>
-                      <td class="py-3 px-5">
-                        <p class="font-bold text-dark mb-0.5">
-                          Tutup Saluran Hilang
-                        </p>
-                        <p class="text-xs text-muted">
-                          <i
-                            data-lucide="droplets"
-                            class="w-3 h-3 inline mr-1"
-                          ></i>
-                          Saluran Air
-                        </p>
-                      </td>
-                      <td class="py-3 px-5 text-muted">Ahmad S.</td>
-                      <td class="py-3 px-5">
-                        <span
-                          class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning border border-warning/20"
-                          >MENUNGGU</span
-                        >
-                      </td>
-                      <td class="py-3 px-5 text-right">
-                        <button
-                          class="bg-primary text-white text-xs px-3 py-1.5 rounded font-semibold hover:bg-primary-dark shadow-sm"
-                        >
-                          Assign Petugas
-                        </button>
-                      </td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition-colors">
-                      <td class="py-3 px-5 font-mono text-xs text-slate-500">
-                        #LP-20260409-14
-                      </td>
-                      <td class="py-3 px-5">
-                        <p class="font-bold text-dark mb-0.5">Trotoar Ambles</p>
-                        <p class="text-xs text-muted">
-                          <i
-                            data-lucide="footprints"
-                            class="w-3 h-3 inline mr-1"
-                          ></i>
-                          Trotoar
-                        </p>
-                      </td>
-                      <td class="py-3 px-5 text-muted">Budi K.</td>
-                      <td class="py-3 px-5">
-                        <span
-                          class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info border border-info/20"
-                          >DIPROSES</span
-                        >
-                      </td>
-                      <td class="py-3 px-5 text-right">
-                        <button
-                          class="border border-slate-300 text-slate-600 text-xs px-3 py-1.5 rounded font-semibold hover:bg-slate-50 shadow-sm"
-                        >
-                          Lihat Detail
-                        </button>
-                      </td>
-                    </tr>
-                    <tr class="hover:bg-slate-50 transition-colors">
-                      <td class="py-3 px-5 font-mono text-xs text-slate-500">
-                        #LP-20260409-11
-                      </td>
-                      <td class="py-3 px-5">
-                        <p class="font-bold text-dark mb-0.5">
-                          Lampu PJU Rusak (Duplikat)
-                        </p>
-                        <p class="text-xs text-muted">
-                          <i
-                            data-lucide="lightbulb-off"
-                            class="w-3 h-3 inline mr-1"
-                          ></i>
-                          Lampu Jalan Mati
-                        </p>
-                      </td>
-                      <td class="py-3 px-5 text-muted">Dimas A.</td>
-                      <td class="py-3 px-5">
-                        <span
-                          class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-danger/10 text-danger border border-danger/20"
-                          >DITOLAK</span
-                        >
-                      </td>
-                      <td class="py-3 px-5 text-right">
-                        <button
-                          class="border border-slate-300 text-slate-600 text-xs px-3 py-1.5 rounded font-semibold hover:bg-slate-50 shadow-sm"
-                        >
-                          Lihat Detail
-                        </button>
-                      </td>
-                    </tr>
+                 <tbody class="text-sm divide-y divide-slate-100 bg-white">
+                      <?php if(mysqli_num_rows($query_terbaru) > 0): ?>
+                          <?php while($laporan = mysqli_fetch_assoc($query_terbaru)): ?>
+                          <tr class="hover:bg-slate-50 transition-colors">
+                              <td class="py-3 px-5 font-mono text-xs text-slate-500">
+                                  #<?php echo str_pad($laporan['id'], 4, '0', STR_PAD_LEFT); ?>
+                              </td>
+                              <td class="py-3 px-5">
+                                  <p class="font-bold text-dark mb-0.5 line-clamp-1"><?php echo $laporan['judul']; ?></p>
+                                  <p class="text-xs text-muted"><?php echo $laporan['kategori']; ?></p>
+                              </td>
+                              <td class="py-3 px-5 text-muted"><?php echo $laporan['nama_pelapor']; ?></td>
+                              <td class="py-3 px-5">
+                                  <?php
+                                  $status = $laporan['status'];
+                                  if($status == 'Menunggu') {
+                                      echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning border border-warning/20">MENUNGGU</span>';
+                                  } elseif($status == 'Diproses') {
+                                      echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info border border-info/20">DIPROSES</span>';
+                                  } elseif($status == 'Selesai') {
+                                      echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">SELESAI</span>';
+                                  } elseif($status == 'Ditolak') {
+                                      echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-danger/10 text-danger border border-danger/20">DITOLAK</span>';
+                                  }
+                                  ?>
+                              </td>
+                              <td class="py-3 px-5 text-right">
+                                  <a href="detailLaporan.php?id=<?php echo $laporan['id']; ?>"
+                                      class="border border-slate-300 text-slate-600 text-xs px-3 py-1.5 rounded font-semibold hover:bg-slate-50 shadow-sm">
+                                      Detail
+                                  </a>
+                              </td>
+                          </tr>
+                          <?php endwhile; ?>
+                      <?php else: ?>
+                          <tr>
+                              <td colspan="5" class="py-8 text-center text-muted">Belum ada laporan</td>
+                          </tr>
+                      <?php endif; ?>
                   </tbody>
                 </table>
               </div>
@@ -574,39 +489,31 @@
       Chart.defaults.color = "#94A3B8"; // text-slate-400
       Chart.defaults.scale.grid.color = "#F1F5F9"; // slate-100
 
+      const kecamatanLabels = <?php echo json_encode($kecamatan_labels); ?>;
+      const kecamatanData   = <?php echo json_encode($kecamatan_data); ?>;
+
       const ctxKec = document.getElementById("kecamatanChart").getContext("2d");
       new Chart(ctxKec, {
-        type: "bar",
-        data: {
-          labels: [
-            "Mataram",
-            "Cakranegara",
-            "Ampenan",
-            "Sekarbela",
-            "Sandubaya",
-            "Selaparang",
-          ],
-          datasets: [
-            {
-              label: "Jumlah Laporan",
-              data: [320, 280, 210, 180, 140, 118],
-              backgroundColor: "#3A5A40", // primary
-              borderRadius: 4,
-            },
-          ],
-        },
-        options: {
-          indexAxis: "y", // Makes it horizontal
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
+          type: "bar",
+          data: {
+              labels: kecamatanLabels,
+              datasets: [{
+                  label: "Jumlah Laporan",
+                  data: kecamatanData,
+                  backgroundColor: "#3A5A40",
+                  borderRadius: 4,
+              }],
           },
-          scales: {
-            x: { beginAtZero: true, grid: { drawBorder: false } },
-            y: { grid: { display: false, drawBorder: false } },
+          options: {
+              indexAxis: "y",
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                  x: { beginAtZero: true, grid: { drawBorder: false } },
+                  y: { grid: { display: false, drawBorder: false } },
+              },
           },
-        },
       });
     </script>
   </body>

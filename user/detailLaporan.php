@@ -1,3 +1,55 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+require __DIR__ . '/../database/conection.php';
+
+$user_id = $_SESSION['user_id'];
+
+$query_user = mysqli_query($koneksi, "SELECT * FROM users WHERE id = '$user_id'");
+$user       = mysqli_fetch_assoc($query_user);
+
+// Ambil ID laporan dari URL
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    header("Location: daftarLaporan.php");
+    exit();
+}
+$id_laporan = $_GET['id'];
+
+// Ambil data laporan - pastikan milik user yang login
+$query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE id = '$id_laporan' AND user_id = '$user_id'");
+
+if (mysqli_num_rows($query_laporan) == 0) {
+    header("Location: daftarLaporan.php");
+    exit();
+}
+$laporan = mysqli_fetch_assoc($query_laporan);
+
+// Proses hapus laporan
+if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
+    // Hapus foto dari folder jika ada
+    if (!empty($laporan['foto'])) {
+        $path_foto = __DIR__ . '/../uploads/foto_laporan/' . $laporan['foto'];
+        if (file_exists($path_foto)) {
+            unlink($path_foto);
+        }
+    }
+    
+    // Hapus dari database
+    mysqli_query($koneksi, "DELETE FROM laporan WHERE id = '$id_laporan' AND user_id = '$user_id'");
+    
+    echo "<script>
+        alert('Laporan berhasil dihapus!');
+        window.location.href = 'daftarLaporan.php';
+    </script>";
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -98,21 +150,21 @@
 
         <!-- Navigation -->
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="beranda.html"
+            <a href="beranda.php"
                 class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Beranda
             </a>
-            <a href="buatLaporan.html"
+            <a href="buatLaporan.php"
                 class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="plus-circle" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Buat Laporan
             </a>
-            <a href="daftarLaporan.html" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
+            <a href="daftarLaporan.php" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
                 <i data-lucide="file-text" class="w-5 h-5 mr-3"></i>
                 Laporan Saya
             </a>
-            <a href="#"
+            <a href="profile.php"
                 class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
                 Profil
@@ -121,16 +173,21 @@
 
         <!-- User Info -->
         <div class="p-4 border-t border-slate-200">
-            <a href="#" class="flex items-center group">
+            <a href="profile.php" class="flex items-center group">
                 <div
                     class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
                     <img src="https://ui-avatars.com/api/?name=Pak+Andi&background=A3B18A&color=ffffff" alt="Avatar"
                         class="w-full h-full object-cover">
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">Pak Andi</p>
+                    <p class="text-sm font-semibold text-dark"><?php echo $user['nama']; ?></p>
                     <p class="text-xs text-muted">Masyarakat</p>
                 </div>
+            </a>
+            <a href="logout.php"
+                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                Keluar
             </a>
         </div>
     </aside>
@@ -148,9 +205,9 @@
             </button>
             <div class="hidden sm:block">
                 <nav class="flex text-white text-muted font-medium">
-                    <a href="beranda.html" class="hover:text-dark">Dashboard</a>
+                    <a href="beranda.php" class="hover:text-dark">Dashboard</a>
                     <span class="mx-2">/</span>
-                    <a href="daftarLaporan.html" class="hover:text-dark">Laporan Saya</a>
+                    <a href="daftarLaporan.php" class="hover:text-dark">Laporan Saya</a>
                     <span class="mx-2">/</span>
                     <span class="text-dark">Detail Laporan</span>
                 </nav>
@@ -177,27 +234,41 @@
                         </button>
                         <div>
                             <div class="flex items-center gap-3 mb-1">
-                                <h2 class="text-2xl font-bold text-white tracking-tight">Detail Laporan #LP-20260408</h2>
-                                <span
-                                    class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-accent text-white border border-info/20 uppercase">
-                                    Diproses
-                                </span>
+                                <h2 class="text-2xl font-bold text-white tracking-tight">
+                                    <?php echo $laporan['judul']; ?>
+                                </h2>
+                                <?php
+                                $status = $laporan['status'];
+                                if($status == 'Menunggu') {
+                                    echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-warning text-white uppercase">Menunggu</span>';
+                                } elseif($status == 'Diproses') {
+                                    echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-info text-white uppercase">Diproses</span>';
+                                } elseif($status == 'Selesai') {
+                                    echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-secondary text-white uppercase">Selesai</span>';
+                                } elseif($status == 'Ditolak') {
+                                    echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-danger text-white uppercase">Ditolak</span>';
+                                }
+                                ?>
                             </div>
-                            <p class="text-muted text-sm">Dilaporkan pada 08 April 2026, 09:15 WITA</p>
+                            <p class="text-muted text-sm">
+                                Dilaporkan pada <?php echo date('d F Y, H:i', strtotime($laporan['tanggal'])); ?> WITA
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Tombol Edit/Hapus hanya muncul jika status MENUNGGU (Disembunyikan di contoh ini karena status DIPROSES) -->
-                    <!-- 
+                    <!-- Tombol Edit/Hapus hanya muncul jika status MENUNGGU (Disembunyikan di contoh ini karena status DIPROSES) -->                
+                    <?php if($laporan['status'] == 'Menunggu'): ?>
                     <div class="flex items-center gap-2">
-                        <button class="px-4 py-2 bg-white border border-slate-300 text-dark font-medium rounded-lg hover:bg-slate-50 transition-colors flex items-center text-sm shadow-sm">
+                        <a href="editLaporan.php?id=<?php echo $laporan['id']; ?>"
+                            class="px-4 py-2 bg-white border border-slate-300 text-dark font-medium rounded-lg hover:bg-slate-50 transition-colors flex items-center text-sm shadow-sm">
                             <i data-lucide="edit" class="w-4 h-4 mr-2"></i> Edit
-                        </button>
-                        <button class="px-4 py-2 bg-white border border-danger text-danger font-medium rounded-lg hover:bg-danger/5 transition-colors flex items-center text-sm shadow-sm">
+                        </a>
+                        <button onclick="konfirmasiHapus()"
+                            class="px-4 py-2 bg-white border border-danger text-danger font-medium rounded-lg hover:bg-danger/5 transition-colors flex items-center text-sm shadow-sm">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
                         </button>
                     </div>
-                    -->
+                    <?php endif; ?>
                 </div>
 
                 <!-- Content Grid -->
@@ -209,47 +280,30 @@
                         <!-- Card Informasi Utama -->
                         <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
                             <div class="p-6">
-                                <h3 class="text-xl font-bold text-dark mb-4">Pohon Tumbang Menutup Jalan</h3>
-
+                                <h3 class="text-xl font-bold text-dark mb-4"><?php echo $laporan['judul']; ?></h3>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 mb-6">
                                     <div>
                                         <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                                             Kategori</p>
                                         <div class="flex items-center text-dark font-medium">
-                                            <div
-                                                class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center mr-2">
-                                                <i data-lucide="tree-deciduous" class="w-4 h-4 text-slate-600"></i>
-                                            </div>
-                                            Pohon Tumbang
+                                            <p class="text-dark font-medium"><?php echo $laporan['kategori']; ?></p>
                                         </div>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                                            Lokasi Kecamatan</p>
-                                        <p class="text-dark font-medium">Mataram (Taman Sangkareang)</p>
+                                        <p class="text-dark font-medium"><?php echo $laporan['kelurahan'] . ', ' . $laporan['kecamatan']; ?></p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                                        Deskripsi Kerusakan</p>
-                                    <p
-                                        class="text-dark text-sm leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
-                                        Terdapat pohon beringin tua yang tumbang akibat hujan angin lebat semalam.
-                                        Batang pohon cukup besar dan menutupi hampir seluruh akses jalan masuk menuju
-                                        area utara Taman Sangkareang. Mohon segera ditangani karena membahayakan
-                                        pengguna jalan dan merusak pagar taman.
-                                    </p>
+                                    <p class="text-dark text-sm leading-relaxed bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                    <?php echo $laporan['deskripsi']; ?>
+                                </p>
                                 </div>
 
                                 <div class="mt-6">
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Alamat
                                         Lengkap</p>
-                                    <div class="flex items-start">
-                                        <i data-lucide="map-pin" class="w-5 h-5 text-primary mt-0.5 mr-2 shrink-0"></i>
-                                        <p class="text-dark text-sm">Jl. Pejanggik, Taman Sangkareang Pintu Utara,
-                                            Mataram Barat, Kec. Mataram, Kota Mataram, Nusa Tenggara Bar.</p>
-                                    </div>
+                                    <p class="text-dark text-sm"><?php echo $laporan['alamat']; ?></p>
                                 </div>
                             </div>
                         </div>
@@ -266,97 +320,19 @@
                             <div class="p-6">
                                 <div class="grid grid-cols-2 gap-4">
                                     <!-- Dummy Images using Unsplash -->
-                                    <div
-                                        class="aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity group relative">
-                                        <img src="https://images.unsplash.com/photo-1582298538104-efa9cb1023c4?q=80&w=600&auto=format&fit=crop"
-                                            alt="Foto Pohon Tumbang 1" class="w-full h-full object-cover">
-                                        <div
-                                            class="absolute inset-0 bg-dark/0 group-hover:bg-dark/20 flex items-center justify-center transition-colors">
-                                            <i data-lucide="zoom-in"
-                                                class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                                        </div>
+                                    <?php if(!empty($laporan['foto'])): ?>
+                                    <div class="aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                                        <img src="../uploads/foto_laporan/<?php echo $laporan['foto']; ?>" 
+                                            alt="Foto Laporan" class="w-full h-full object-cover">
                                     </div>
-                                    <div
-                                        class="aspect-video bg-slate-100 rounded-lg overflow-hidden border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity group relative">
-                                        <img src="https://images.unsplash.com/photo-1545610842-45e05417ab75?q=80&w=600&auto=format&fit=crop"
-                                            alt="Foto Pohon Tumbang 2" class="w-full h-full object-cover">
-                                        <div
-                                            class="absolute inset-0 bg-dark/0 group-hover:bg-dark/20 flex items-center justify-center transition-colors">
-                                            <i data-lucide="zoom-in"
-                                                class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                                        </div>
-                                    </div>
+                                    <?php else: ?>
+                                    <p class="text-muted text-sm">Tidak ada foto</p>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
 
                     </div>
-
-                    <!-- Right Column: Timeline & Progress (1/3 width on LG) -->
-                    <div class="space-y-6">
-
-                        <!-- Card Timeline Status -->
-                        <div
-                            class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden sticky top-24">
-                            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
-                                <h3 class="font-bold text-dark">Progress Penanganan</h3>
-                            </div>
-                            <div class="p-6">
-                                <div class="relative">
-
-                                    <!-- Item 3: Current Status (Diproses) -->
-                                    <div class="timeline-item relative pb-6 pl-8">
-                                        <div
-                                            class="absolute left-0 top-1 w-6 h-6 rounded-full bg-accent border-2 border-primary flex items-center justify-center z-10">
-                                            <div class="w-2 h-2 rounded-full bg-primary"></div>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-sm font-bold text-dark">Sedang Diproses</h4>
-                                            <p class="text-xs text-muted mb-2">08 Apr 2026, 14:30 WITA</p>
-                                            <div
-                                                class="bg-info/5 border border-info/10 rounded-lg p-3 text-xs text-dark mt-2">
-                                                <p class="font-semibold text-primary mb-1"><i data-lucide="user"
-                                                        class="w-3 h-3 inline mr-1"></i> Pak Budi (Petugas Dinas Taman)
-                                                </p>
-                                                "Petugas sedang menuju lokasi dengan membawa alat pemotong (chainsaw)
-                                                dan truk pengangkut."
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Item 2: Assign Petugas -->
-                                    <div class="timeline-item relative pb-6 pl-8">
-                                        <div
-                                            class="absolute left-0 top-1 w-6 h-6 rounded-full bg-white border-2 border-slate-300 flex items-center justify-center z-10">
-                                            <i data-lucide="check" class="w-3 h-3 text-slate-400"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-sm font-semibold text-slate-600">Laporan Diterima &
-                                                Ditugaskan</h4>
-                                            <p class="text-xs text-muted">08 Apr 2026, 10:00 WITA</p>
-                                            <p class="text-xs text-slate-500 mt-1">Admin telah memverifikasi laporan dan
-                                                menugaskannya ke Dinas Pertamanan kota.</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Item 1: Laporan Dibuat -->
-                                    <div class="timeline-item relative pl-8">
-                                        <div
-                                            class="absolute left-0 top-1 w-6 h-6 rounded-full bg-white border-2 border-slate-300 flex items-center justify-center z-10">
-                                            <i data-lucide="check" class="w-3 h-3 text-slate-400"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="text-sm font-semibold text-slate-600">Laporan Dibuat</h4>
-                                            <p class="text-xs text-muted">08 Apr 2026, 09:15 WITA</p>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
                 </div>
 
             </div>
@@ -382,6 +358,12 @@
                 document.body.style.overflow = 'auto';
             }
         }
+
+        function konfirmasiHapus() {
+        if (confirm('Apakah Anda yakin ingin menghapus laporan ini?')) {
+            window.location.href = 'detailLaporan.php?id=<?php echo $laporan['id']; ?>&hapus=true';
+        }
+    }
     </script>
 </body>
 

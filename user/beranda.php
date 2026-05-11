@@ -1,15 +1,25 @@
 <?php
 session_start();
 
-// Jika belum login, redirect ke halaman login
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
     exit();
 }
 
-// Ambil data dari session
+require __DIR__ . '/../database/conection.php';
+
+$user_id  = $_SESSION['user_id'];
 $nama     = $_SESSION['nama'];
 $username = $_SESSION['username'];
+
+// Ambil statistik laporan
+$total     = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id'"))['total'];
+$menunggu  = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Menunggu'"))['total'];
+$diproses  = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Diproses'"))['total'];
+$selesai   = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Selesai'"))['total'];
+
+// Ambil 3 laporan terbaru
+$query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '$user_id' ORDER BY tanggal DESC LIMIT 3");
 ?>
 
 <!DOCTYPE html>
@@ -135,7 +145,7 @@ $username = $_SESSION['username'];
             <a href="logout.php"
                 class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
                 <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
-                 Keluar
+                Keluar
             </a>
         </div>
     </aside>
@@ -185,8 +195,8 @@ $username = $_SESSION['username'];
                     <div
                         class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-primary/30 transition-colors">
                         <div>
-                            <p class="text-sm font-medium text-muted">Total Laporan</p>
-                            <p class="text-3xl font-bold text-dark mt-1">3</p>
+                            <p class="text-3xl font-bold text-dark mt-1"><?php echo $total; ?></p>
+                            <p class="text-sm text-muted">Total Laporan</p>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                             <i data-lucide="layers" class="w-6 h-6"></i>
@@ -197,8 +207,8 @@ $username = $_SESSION['username'];
                     <div
                         class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-warning/30 transition-colors">
                         <div>
-                            <p class="text-sm font-medium text-muted">Menunggu</p>
-                            <p class="text-3xl font-bold text-dark mt-1">1</p>
+                            <p class="text-3xl font-bold text-dark mt-1"><?php echo $menunggu; ?></p>
+                            <p class="text-sm text-muted">Menunggu</p>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center text-warning">
                             <i data-lucide="clock" class="w-6 h-6"></i>
@@ -209,8 +219,8 @@ $username = $_SESSION['username'];
                     <div
                         class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-info/30 transition-colors">
                         <div>
-                            <p class="text-sm font-medium text-muted">Diproses</p>
-                            <p class="text-3xl font-bold text-dark mt-1">1</p>
+                            <p class="text-3xl font-bold text-dark mt-1"><?php echo $diproses; ?></p>
+                            <p class="text-sm text-muted">Diproses</p>
                         </div>
                         <div class="w-12 h-12 rounded-full bg-info/10 flex items-center justify-center text-info">
                             <i data-lucide="settings" class="w-6 h-6 animate-[spin_3s_linear_infinite]"></i>
@@ -221,8 +231,8 @@ $username = $_SESSION['username'];
                     <div
                         class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:border-secondary/30 transition-colors">
                         <div>
-                            <p class="text-sm font-medium text-muted">Selesai</p>
-                            <p class="text-3xl font-bold text-dark mt-1">1</p>
+                            <p class="text-3xl font-bold text-dark mt-1"><?php echo $selesai; ?></p>
+                            <p class="text-sm text-muted">Selesai</p>
                         </div>
                         <div
                             class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
@@ -235,7 +245,7 @@ $username = $_SESSION['username'];
                 <div>
                     <div class="flex items-center justify-between mb-4 mt-8">
                         <h3 class="text-lg font-bold text-white">Laporan Terbaru Anda</h3>
-                        <a href="daftarLaporan.html" class="text-sm font-medium text-primary hover:text-primary-dark">Lihat Semua
+                        <a href="daftarLaporan.php" class="text-sm font-medium text-primary hover:text-primary-dark">Lihat Semua
                             &rarr;</a>
                     </div>
 
@@ -255,84 +265,50 @@ $username = $_SESSION['username'];
                                     </tr>
                                 </thead>
                                 <tbody class="text-sm divide-y divide-slate-100">
-                                    <!-- Row 1: Menunggu -->
-                                    <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="window.location='detailLaporan.html'">
-                                        <td class="py-4 px-4">
-                                            <p class="font-bold text-dark group-hover:text-primary transition-colors">
-                                                Jalan Berlubang Dalam</p>
-                                            <div class="flex items-center text-muted mt-1 text-xs">
-                                                <i data-lucide="road" class="w-3.5 h-3.5 mr-1"></i>
-                                                Jalan Rusak
-                                            </div>
-                                        </td>
-                                        <td class="py-4 px-4 text-muted">Jl. Pejanggik, Cakranegara</td>
-                                        <td class="py-4 px-4 text-muted">Hari ini, 08:30</td>
-                                        <td class="py-4 px-4">
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-warning/10 text-warning border border-warning/20">
-                                                MENUNGGU
-                                            </span>
-                                        </td>
-                                        <td class="py-4 px-4 text-right">
-                                            <button
-                                                class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary/10 transition-colors"
-                                                title="Lihat Detail">
-                                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <!-- Row 2: Diproses -->
-                                    <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="window.location='detailLaporan.html'">
-                                        <td class="py-4 px-4">
-                                            <p class="font-bold text-dark group-hover:text-primary transition-colors">
-                                                Pohon Tumbang di Taman</p>
-                                            <div class="flex items-center text-muted mt-1 text-xs">
-                                                <i data-lucide="tree-deciduous" class="w-3.5 h-3.5 mr-1"></i>
-                                                Pohon Tumbang
-                                            </div>
-                                        </td>
-                                        <td class="py-4 px-4 text-muted">Taman Sangkareang, Mataram</td>
-                                        <td class="py-4 px-4 text-muted">08 Apr 2026</td>
-                                        <td class="py-4 px-4">
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-info/10 text-info border border-info/20">
-                                                DIPROSES
-                                            </span>
-                                        </td>
-                                        <td class="py-4 px-4 text-right">
-                                            <button
-                                                class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary/10 transition-colors"
-                                                title="Lihat Detail">
-                                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <!-- Row 3: Selesai -->
-                                    <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" onclick="window.location='detailLaporan.html'">
-                                        <td class="py-4 px-4">
-                                            <p class="font-bold text-dark group-hover:text-primary transition-colors">
-                                                Lampu PJU Padam</p>
-                                            <div class="flex items-center text-muted mt-1 text-xs">
-                                                <i data-lucide="lightbulb-off" class="w-3.5 h-3.5 mr-1"></i>
-                                                Lampu Jalan Mati
-                                            </div>
-                                        </td>
-                                        <td class="py-4 px-4 text-muted">Jl. Udayana, Selaparang</td>
-                                        <td class="py-4 px-4 text-muted">01 Apr 2026</td>
-                                        <td class="py-4 px-4">
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">
-                                                SELESAI
-                                            </span>
-                                        </td>
-                                        <td class="py-4 px-4 text-right">
-                                            <button
-                                                class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary/10 transition-colors"
-                                                title="Lihat Detail">
-                                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
+                                    <?php if(mysqli_num_rows($query_laporan) > 0): ?>
+                                        <?php while($laporan = mysqli_fetch_assoc($query_laporan)): ?>
+                                        <tr class="hover:bg-slate-50 transition-colors group cursor-pointer"
+                                            onclick="window.location='detailLaporan.php?id=<?php echo $laporan['id']; ?>'">
+                                            <td class="py-4 px-4">
+                                                <p class="font-bold text-dark group-hover:text-primary transition-colors">
+                                                    <?php echo $laporan['judul']; ?>
+                                                </p>
+                                                <div class="flex items-center text-muted mt-1 text-xs">
+                                                    <?php echo $laporan['kategori']; ?>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-4 text-muted"><?php echo $laporan['kelurahan'] . ', ' . $laporan['kecamatan']; ?></td>
+                                            <td class="py-4 px-4 text-muted"><?php echo date('d M Y', strtotime($laporan['tanggal'])); ?></td>
+                                            <td class="py-4 px-4">
+                                                <?php
+                                                $status = $laporan['status'];
+                                                if($status == 'Menunggu') {
+                                                    echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-warning/10 text-warning border border-warning/20">MENUNGGU</span>';
+                                                } elseif($status == 'Diproses') {
+                                                    echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-info/10 text-info border border-info/20">DIPROSES</span>';
+                                                } elseif($status == 'Selesai') {
+                                                    echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">SELESAI</span>';
+                                                } elseif($status == 'Ditolak') {
+                                                    echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-danger/10 text-danger border border-danger/20">DITOLAK</span>';
+                                                }
+                                                ?>
+                                            </td>
+                                            <td class="py-4 px-4 text-right">
+                                                <a href="detailLaporan.php?id=<?php echo $laporan['id']; ?>"
+                                                    class="text-primary hover:text-primary-dark p-2 rounded-lg hover:bg-primary/10 transition-colors inline-block">
+                                                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <?php endwhile; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="5" class="py-10 text-center text-muted">
+                                                <p class="font-medium">Belum ada laporan</p>
+                                                <a href="buatLaporan.php" class="text-primary text-sm hover:underline mt-1 inline-block">Buat laporan pertama Anda</a>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
