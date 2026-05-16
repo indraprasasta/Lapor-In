@@ -62,11 +62,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <style>body { font-family: 'Poppins', sans-serif; }</style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 bg-primary">
+    <img src="https://i.pinimg.com/1200x/fc/02/64/fc026433a20db53bc4447d4e41f8f830.jpg" 
+            alt="Latar Belakang Kota Mataram"
+            class="absolute w-full h-full object-cover top-0 left-0 -z-10">
+
 
     <div class="w-full max-w-[380px] bg-white rounded-[40px] p-8 border-[5px] border-white/20 shadow-2xl relative">
         
         <!-- Tombol X kembali ke landing page -->
-        <a href="../index.php" 
+        <a href="../index.php"
             class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors">
             <i class="fa-solid fa-xmark text-sm"></i>
         </a>

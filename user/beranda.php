@@ -177,7 +177,7 @@ $query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                            Halo, <?php echo $username; ?> 👋
+                            Halo, <?php echo $username; ?>
                         </h2>
                         <p class="text-muted mt-1  sm:text-sm">Pantau dan kelola laporan infrastruktur di
                             lingkungan Anda.</p>
@@ -315,40 +315,47 @@ $query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '
 
                         <!-- Mobile Card View -->
                         <div class="md:hidden flex flex-col divide-y divide-slate-100">
-                            <!-- Card 1 -->
-                            <div class="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer" onclick="window.location='detailLaporan.html'">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning uppercase tracking-wide">
-                                        Menunggu
-                                    </span>
-                                    <span class="text-xs text-muted">Hari ini, 08:30</span>
+                            <div class="md:hidden flex flex-col divide-y divide-slate-100">
+                                <?php
+                                // Reset query pointer ke awal
+                                mysqli_data_seek($query_laporan, 0);
+                                if(mysqli_num_rows($query_laporan) > 0):
+                                    while($laporan = mysqli_fetch_assoc($query_laporan)):
+                                ?>
+                                <div class="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer"
+                                    onclick="window.location='detailLaporan.php?id=<?php echo $laporan['id']; ?>'">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <?php
+                                        $status = $laporan['status'];
+                                        if($status == 'Menunggu') {
+                                            echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning uppercase tracking-wide">Menunggu</span>';
+                                        } elseif($status == 'Diproses') {
+                                            echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info uppercase tracking-wide">Diproses</span>';
+                                        } elseif($status == 'Selesai') {
+                                            echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary uppercase tracking-wide">Selesai</span>';
+                                        } elseif($status == 'Ditolak') {
+                                            echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-danger/10 text-danger uppercase tracking-wide">Ditolak</span>';
+                                        }
+                                        ?>
+                                        <span class="text-xs text-muted"><?php echo date('d M Y', strtotime($laporan['tanggal'])); ?></span>
+                                    </div>
+                                    <h4 class="font-bold text-dark text-sm mb-1"><?php echo $laporan['judul']; ?></h4>
+                                    <div class="flex items-center text-xs text-muted mb-2">
+                                        <i data-lucide="tag" class="w-3 h-3 mr-1"></i> <?php echo $laporan['kategori']; ?>
+                                    </div>
+                                    <div class="flex items-center text-xs text-muted">
+                                        <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> <?php echo $laporan['kelurahan'] . ', ' . $laporan['kecamatan']; ?>
+                                    </div>
                                 </div>
-                                <h4 class="font-bold text-dark text-sm mb-1">Jalan Berlubang Dalam</h4>
-                                <div class="flex items-center text-xs text-muted mb-2">
-                                    <i data-lucide="road" class="w-3 h-3 mr-1"></i> Jalan Rusak
+                                <?php
+                                    endwhile;
+                                else:
+                                ?>
+                                <div class="p-8 text-center text-muted">
+                                    <p class="font-medium text-sm">Belum ada laporan</p>
+                                    <a href="buatLaporan.php" class="text-primary text-xs hover:underline mt-1 inline-block">Buat laporan pertama</a>
                                 </div>
-                                <div class="flex items-center text-xs text-muted">
-                                    <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> Jl. Pejanggik, Cakranegara
-                                </div>
-                            </div>
-
-                            <!-- Card 2 -->
-                            <div class="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer" onclick="window.location='detailLaporan.html'">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info uppercase tracking-wide">
-                                        Diproses
-                                    </span>
-                                    <span class="text-xs text-muted">08 Apr 2026</span>
-                                </div>
-                                <h4 class="font-bold text-dark text-sm mb-1">Pohon Tumbang di Taman</h4>
-                                <div class="flex items-center text-xs text-muted mb-2">
-                                    <i data-lucide="tree-deciduous" class="w-3 h-3 mr-1"></i> Pohon Tumbang
-                                </div>
-                                <div class="flex items-center text-xs text-muted">
-                                    <i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> Taman Sangkareang, Mataram
-                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
 

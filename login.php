@@ -16,28 +16,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = mysqli_real_escape_string($koneksi, $_POST['username']);
     $password = $_POST['password'];
 
-    // Cari user berdasarkan username
+    // pengecekan untuk user dan petugas 
+    //cek di bagian user dahulu
     $query = mysqli_query($koneksi, "SELECT * FROM users WHERE username = '$username'");
 
     if (mysqli_num_rows($query) == 1) {
         $data = mysqli_fetch_assoc($query);
-        
-        if ( $data['password'] == $password) {
-            
-            // Simpan data user ke SESSION
+        if ($data['password'] == $password) {
             $_SESSION['user_id']  = $data['id'];
             $_SESSION['username'] = $data['username'];
             $_SESSION['nama']     = $data['nama'];
-
-            // Redirect ke dashboard
             header("Location: user/beranda.php");
             exit();
-
         } else {
-            $pesan_error = "Password yang kamu masukkan salah!";
+            $pesan_error = "Password salah!";
         }
     } else {
-        $pesan_error = "Username tidak ditemukan!";
+        // Cek di tabel petugas
+        $query_petugas = mysqli_query($koneksi, "
+            SELECT petugas.*, dinas.nama_dinas 
+            FROM petugas 
+            JOIN dinas ON petugas.dinas_id = dinas.id 
+            WHERE petugas.username = '$username'
+        ");
+
+        if (mysqli_num_rows($query_petugas) == 1) {
+            $petugas = mysqli_fetch_assoc($query_petugas);
+            if ($petugas['password'] == $password) {
+                $_SESSION['petugas_id']       = $petugas['id'];
+                $_SESSION['petugas_username'] = $petugas['username'];
+                $_SESSION['petugas_nama']     = $petugas['nama'];
+                $_SESSION['petugas_jabatan']  = $petugas['jabatan'];
+                $_SESSION['petugas_dinas']    = $petugas['nama_dinas'];
+                header("Location: petugas/beranda.php");
+                exit();
+            } else {
+                $pesan_error = "Password salah!";
+            }
+        } else {
+            $pesan_error = "Username tidak ditemukan!";
+        }
     }
 }
 ?> 
@@ -86,7 +104,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <img src="https://i.pinimg.com/1200x/fc/02/64/fc026433a20db53bc4447d4e41f8f830.jpg" 
             alt="Latar Belakang Kota Mataram"
             class="absolute w-full h-full object-cover top-0 left-0 -z-10">
-
             <div class="absolute w-full h-full bg-black/40 top-0 left-0 -z-10"></div>
 
 
@@ -105,7 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <?php if($pesan_error != ""): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-[15px] text-sm text-center mb-2">
-                 <?php echo $pesan_error; ?>
+                <?php echo $pesan_error; ?>
                 </div>
             <?php endif; ?>
             
