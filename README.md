@@ -43,6 +43,15 @@ PETUGAS
 ```
 ---
 
+## 👥 Tim Pengembang
+
+| Nama | NIM | Role & Tanggung Jawab |
+|------|-----|----------------------|
+| **I Wayan Girindra Prasasta** | F1D02410009 | **Fullstack Lead** — Desain halaman dengan (Tailwind CSS), landing page, & halaman user, responsivitas Arsitektur sistem, backend PHP (autentikasi, manajemen laporan), koneksi MySQL |
+| **Mochammad Gaza Hadi Rabbani** | F1D02410121 | **Fullstack Lead** — Desain halaman dengan (Tailwind CSS) admin, integrasi form | Arsitektur sistem, backend PHP (autentikasi, logika petugas), desain database, koneksi MySQL |
+
+---
+
 ## 💻 Tech Stack
 
 | Kategori | Teknologi |
