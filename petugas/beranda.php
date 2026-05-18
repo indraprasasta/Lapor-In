@@ -1,9 +1,48 @@
 <?php
 session_start();
+require __DIR__ . '/../database/conection.php';
 
 if (!isset($_SESSION['petugas_id'])) {
     header("Location: ../login.php");
     exit();
+}
+// Ambil kategori yang menjadi tanggung jawab dinas petugas
+$dinas_id = $_SESSION['petugas_dinas_id'];
+$query_kategori = mysqli_query($koneksi,
+    "SELECT kategori FROM dinas_kategori WHERE dinas_id = '$dinas_id'"
+);
+
+$kategori_list = [];
+while($row = mysqli_fetch_assoc($query_kategori)) {
+    $kategori_list[] = "'" . mysqli_real_escape_string($koneksi, $row['kategori']) . "'";
+}
+//validasi
+if (empty($kategori_list)) {
+    $query_laporan     = null;
+    $total_ditugaskan  = 0;
+    $sedang_diproses   = 0;
+    $selesai_ditangani = 0;
+} else {
+    $kategori_in = implode(',', $kategori_list);
+
+    $query_laporan = mysqli_query($koneksi,
+        "SELECT * FROM laporan 
+         WHERE kategori IN ($kategori_in) 
+         AND status IN ('Menunggu', 'Diproses')
+         ORDER BY tanggal DESC"
+    );
+
+    $total_ditugaskan = mysqli_fetch_assoc(mysqli_query($koneksi,
+        "SELECT COUNT(*) as total FROM laporan 
+         WHERE kategori IN ($kategori_in)"))['total'];
+
+    $sedang_diproses = mysqli_fetch_assoc(mysqli_query($koneksi,
+        "SELECT COUNT(*) as total FROM laporan 
+         WHERE kategori IN ($kategori_in) AND status = 'Diproses'"))['total'];
+
+    $selesai_ditangani = mysqli_fetch_assoc(mysqli_query($koneksi,
+        "SELECT COUNT(*) as total FROM laporan 
+         WHERE kategori IN ($kategori_in) AND status = 'Selesai'"))['total'];
 }
 
 $petugas_nama    = $_SESSION['petugas_nama'];
@@ -148,28 +187,28 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
             class="hidden ml-4 mt-1 space-y-1 border-l-2 border-slate-100 pl-3"
           >
             <a
-              href="#"
+              href="pengaduan.php?status=Menunggu"
               class="flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-dark hover:bg-slate-50 rounded-lg transition-colors"
             >
               <span class="w-2 h-2 rounded-full bg-warning inline-block"></span>
               Pengaduan Masuk
             </a>
             <a
-              href="#"
+              href="pengaduan.php?status=Diproses"
               class="flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-dark hover:bg-slate-50 rounded-lg transition-colors"
             >
               <span class="w-2 h-2 rounded-full bg-info inline-block"></span>
               Pengaduan Proses
             </a>
             <a
-              href="#"
+              href="pengaduan.php?status=Ditolak"
               class="flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-dark hover:bg-slate-50 rounded-lg transition-colors"
             >
               <span class="w-2 h-2 rounded-full bg-danger inline-block"></span>
               Pengaduan Ditolak
             </a>
             <a
-              href="#"
+              href="pengaduan.php?status=Selesai"
               class="flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-dark hover:bg-slate-50 rounded-lg transition-colors"
             >
               <span
@@ -179,18 +218,6 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
             </a>
           </div>
         </div>
-
-        <!-- Riwayat -->
-        <a
-          href="#"
-          class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
-        >
-          <i
-            data-lucide="history"
-            class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
-          ></i>
-          Riwayat Penanganan
-        </a>
 
         <div
           class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider"
@@ -220,14 +247,11 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
             <i data-lucide="user" class="w-5 h-5 text-muted"></i>
           </div>
           <div class="ml-3">
-            <!-- Nama & jabatan diisi dinamis nanti -->
-            <p
-              class="text-sm font-semibold text-dark group-hover:text-primary transition-colors"
-            >
-              —
+            <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">
+                <?php echo $petugas_nama; ?>
             </p>
-            <p class="text-xs text-muted">Petugas Lapangan</p>
-          </div>
+            <p class="text-xs text-muted"><?php echo $petugas_jabatan; ?></p>
+        </div>
         </a>
         <a
           href="logout.php"
@@ -282,8 +306,9 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
             >
               <div>
                 <p class="text-sm font-medium text-muted">Total Ditugaskan</p>
-                <p class="text-3xl font-bold text-dark mt-1">—</p>
-                <!-- Nanti: <?= $total_ditugaskan ?> -->
+                <p class="text-3xl font-bold text-dark mt-1">
+                  <?php echo $total_ditugaskan; ?>
+                </p>
               </div>
               <div
                 class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary"
@@ -298,8 +323,9 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
               <div class="absolute inset-x-0 bottom-0 h-1 bg-info"></div>
               <div>
                 <p class="text-sm font-medium text-muted">Sedang Diproses</p>
-                <p class="text-3xl font-bold text-dark mt-1">—</p>
-                <!-- Nanti: <?= $sedang_diproses ?> -->
+                <p class="text-3xl font-bold text-dark mt-1">
+                  <?= $sedang_diproses ?>
+                </p>
               </div>
               <div
                 class="w-12 h-12 rounded-full bg-info/10 flex items-center justify-center text-info"
@@ -316,8 +342,7 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
             >
               <div>
                 <p class="text-sm font-medium text-muted">Selesai Ditangani</p>
-                <p class="text-3xl font-bold text-dark mt-1">—</p>
-                <!-- Nanti: <?= $selesai_ditangani ?> -->
+                <p class="text-3xl font-bold text-dark mt-1"><?= $selesai_ditangani ?></p>
               </div>
               <div
                 class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary"
@@ -365,217 +390,136 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
                       </th>
                     </tr>
                   </thead>
-                  <tbody
-                    id="taskTableBody"
-                    class="text-sm divide-y divide-slate-100"
-                  >
-                    <!-- =====================================================
-                                         CONTOH ROW — hapus semua ini dan ganti dengan PHP loop
-                                         ===================================================== -->
-
-                    <!-- Contoh: Status Menunggu -->
-                    <tr class="hover:bg-slate-50 transition-colors" id="row-1">
-                      <td class="py-4 px-4 align-top">
-                        <div class="flex items-start">
-                          <div
-                            class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center mr-3 shrink-0 border border-slate-200"
-                          >
-                            <i
-                              data-lucide="file-text"
-                              class="w-5 h-5 text-primary"
-                            ></i>
-                          </div>
-                          <div>
-                            <p class="font-bold text-dark mb-1">
-                              Judul Laporan Contoh
-                            </p>
-                            <p class="text-xs text-muted">
-                              Kategori | #LP-00000001
-                            </p>
-                            <p class="text-xs text-muted mt-0.5">Pelapor: —</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="py-4 px-4 align-top">
-                        <p class="text-dark font-medium text-sm">
-                          Nama Kelurahan
-                        </p>
-                        <p class="text-xs text-muted">Kec. Nama Kecamatan</p>
-                      </td>
-                      <td class="py-4 px-4 align-top text-sm text-muted">
-                        <p class="text-dark">01 Jan 2026</p>
-                        <p class="text-xs">08:00 WITA</p>
-                      </td>
-                      <td
-                        class="py-4 px-4 align-top text-center"
-                        id="status-badge-1"
-                      >
-                        <span
-                          class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-warning/10 text-warning border border-warning/20"
-                          >MENUNGGU</span
-                        >
-                      </td>
-                      <td class="py-4 px-4 align-top text-center">
-                        <button
-                          onclick="
-                            openModal(1, 'Menunggu', 'Judul Laporan Contoh')
-                          "
-                          class="bg-white border border-primary text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-full shadow-sm"
-                        >
-                          Mulai Proses
-                        </button>
-                      </td>
-                    </tr>
-
-                    <!-- Contoh: Status Diproses -->
-                    <tr class="hover:bg-slate-50 transition-colors" id="row-2">
-                      <td class="py-4 px-4 align-top">
-                        <div class="flex items-start">
-                          <div
-                            class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center mr-3 shrink-0 border border-slate-200"
-                          >
-                            <i
-                              data-lucide="file-text"
-                              class="w-5 h-5 text-primary"
-                            ></i>
-                          </div>
-                          <div>
-                            <p class="font-bold text-dark mb-1">
-                              Judul Laporan Contoh 2
-                            </p>
-                            <p class="text-xs text-muted">
-                              Kategori | #LP-00000002
-                            </p>
-                            <p class="text-xs text-muted mt-0.5">Pelapor: —</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="py-4 px-4 align-top">
-                        <p class="text-dark font-medium text-sm">
-                          Nama Kelurahan
-                        </p>
-                        <p class="text-xs text-muted">Kec. Nama Kecamatan</p>
-                      </td>
-                      <td class="py-4 px-4 align-top text-sm text-muted">
-                        <p class="text-dark">01 Jan 2026</p>
-                        <p class="text-xs">10:00 WITA</p>
-                      </td>
-                      <td
-                        class="py-4 px-4 align-top text-center"
-                        id="status-badge-2"
-                      >
-                        <span
-                          class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-info/10 text-info border border-info/20"
-                          >DIPROSES</span
-                        >
-                      </td>
-                      <td class="py-4 px-4 align-top text-center">
-                        <button
-                          onclick="
-                            openModal(2, 'Diproses', 'Judul Laporan Contoh 2')
-                          "
-                          class="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-full shadow-sm"
-                        >
-                          Update Status
-                        </button>
-                      </td>
-                    </tr>
-
-                    <!-- =====================================================
-                                         AKHIR CONTOH ROW
-                                         ===================================================== -->
+                  <tbody id="taskTableBody" class="text-sm divide-y divide-slate-100">
+                      <?php if($query_laporan && mysqli_num_rows($query_laporan) > 0): ?>
+                          <?php while($laporan = mysqli_fetch_assoc($query_laporan)): ?>
+                          <tr class="hover:bg-slate-50 transition-colors" id="row-<?php echo $laporan['id']; ?>">
+                              <td class="py-4 px-4 align-top">
+                                  <div class="flex items-start">
+                                      <div class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center mr-3 shrink-0 border border-slate-200">
+                                          <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>
+                                      </div>
+                                      <div>
+                                          <p class="font-bold text-dark mb-1"><?php echo $laporan['judul']; ?></p>
+                                          <p class="text-xs text-muted"><?php echo $laporan['kategori']; ?></p>
+                                      </div>
+                                  </div>
+                              </td>
+                              <td class="py-4 px-4 align-top">
+                                  <p class="text-dark font-medium text-sm"><?php echo $laporan['kelurahan']; ?></p>
+                                  <p class="text-xs text-muted">Kec. <?php echo $laporan['kecamatan']; ?></p>
+                              </td>
+                              <td class="py-4 px-4 align-top text-sm text-muted">
+                                  <p class="text-dark"><?php echo date('d M Y', strtotime($laporan['tanggal'])); ?></p>
+                                  <p class="text-xs"><?php echo date('H:i', strtotime($laporan['tanggal'])); ?> WITA</p>
+                              </td>
+                              <td class="py-4 px-4 align-top text-center" id="status-badge-<?php echo $laporan['id']; ?>">
+                                  <?php
+                                  $s = $laporan['status'];
+                                  if($s == 'Menunggu') echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-warning/10 text-warning border border-warning/20">MENUNGGU</span>';
+                                  elseif($s == 'Diproses') echo '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-info/10 text-info border border-info/20">DIPROSES</span>';
+                                  ?>
+                              </td>
+                              <td class="py-4 px-4 align-top text-center">
+                                  <?php if($laporan['status'] == 'Menunggu'): ?>
+                                  <button onclick="openModal(<?php echo $laporan['id']; ?>, 'Menunggu', '<?php echo addslashes($laporan['judul']); ?>')"
+                                      class="bg-white border border-primary text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-full shadow-sm">
+                                      Mulai Proses
+                                  </button>
+                                  <?php else: ?>
+                                  <button onclick="openModal(<?php echo $laporan['id']; ?>, 'Diproses', '<?php echo addslashes($laporan['judul']); ?>')"
+                                      class="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-full shadow-sm">
+                                      Update Status
+                                  </button>
+                                  <?php endif; ?>
+                              </td>
+                          </tr>
+                          <?php endwhile; ?>
+                      <?php else: ?>
+                          <tr>
+                              <td colspan="5" class="py-12 text-center text-muted">
+                                  <div class="flex flex-col items-center">
+                                      <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mb-3">
+                                          <i data-lucide="check-circle" class="w-7 h-7 text-secondary"></i>
+                                      </div>
+                                      <p class="font-semibold text-dark">Tidak ada tugas aktif</p>
+                                      <p class="text-sm mt-1">Semua laporan telah ditangani.</p>
+                                  </div>
+                              </td>
+                          </tr>
+                      <?php endif; ?>
                   </tbody>
                 </table>
               </div>
 
               <!-- Mobile Card View -->
               <div class="md:hidden flex flex-col divide-y divide-slate-100">
-                <!-- Contoh Card: Menunggu -->
-                <div class="p-4 bg-white border-l-4 border-warning">
+              <?php
+              $kategori_in    = '';
+              // query ulang untuk mobile (pointer sudah habis)
+              if (!empty($kategori_list)) {
+                  $q_mobile = mysqli_query($koneksi,
+                      "SELECT * FROM laporan
+                      WHERE kategori IN ($kategori_in)
+                      AND status IN ('Menunggu', 'Diproses')
+                      ORDER BY tanggal DESC"
+                  );
+                  if ($q_mobile && mysqli_num_rows($q_mobile) > 0):
+                      while ($lap = mysqli_fetch_assoc($q_mobile)):
+                          $border_color = $lap['status'] === 'Menunggu' ? 'border-warning' : 'border-info';
+                          $badge_class  = $lap['status'] === 'Menunggu'
+                              ? 'bg-warning/10 text-warning border-warning/20'
+                              : 'bg-info/10 text-info border-info/20';
+              ?>
+              <div class="p-4 bg-white border-l-4 <?php echo $border_color; ?>">
                   <div class="flex justify-between items-start mb-2">
-                    <span
-                      class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning uppercase tracking-wide border border-warning/20"
-                      >Menunggu</span
-                    >
-                    <span class="text-xs text-muted">01 Jan 2026</span>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold <?php echo $badge_class; ?> uppercase tracking-wide border">
+                          <?php echo $lap['status']; ?>
+                      </span>
+                      <span class="text-xs text-muted"><?php echo date('d M Y', strtotime($lap['tanggal'])); ?></span>
                   </div>
-                  <h4 class="font-bold text-dark text-sm mb-1">
-                    Judul Laporan Contoh
-                  </h4>
-                  <p class="text-xs text-muted mb-3">Kategori | #LP-00000001</p>
-                  <div
-                    class="bg-slate-50 rounded-lg p-3 mb-3 border border-slate-100 space-y-2"
-                  >
-                    <div class="flex items-start text-sm">
-                      <i
-                        data-lucide="map-pin"
-                        class="w-4 h-4 text-slate-400 mr-2 mt-0.5 shrink-0"
-                      ></i>
-                      <span class="text-dark font-medium"
-                        >Nama Kelurahan, Kec. Nama Kecamatan</span
-                      >
-                    </div>
-                    <div class="flex items-start text-sm">
-                      <i
-                        data-lucide="clock"
-                        class="w-4 h-4 text-slate-400 mr-2 mt-0.5 shrink-0"
-                      ></i>
-                      <span class="text-muted"
-                        >Dilaporkan: 01 Jan 2026, 08:00 WITA</span
-                      >
-                    </div>
+                  <h4 class="font-bold text-dark text-sm mb-1"><?php echo htmlspecialchars($lap['judul']); ?></h4>
+                  <p class="text-xs text-muted mb-3"><?php echo htmlspecialchars($lap['kategori']); ?></p>
+                  <div class="bg-slate-50 rounded-lg p-3 mb-3 border border-slate-100 space-y-2">
+                      <div class="flex items-start text-sm">
+                          <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 mr-2 mt-0.5 shrink-0"></i>
+                          <span class="text-dark font-medium"><?php echo htmlspecialchars($lap['kelurahan']); ?>, Kec. <?php echo htmlspecialchars($lap['kecamatan']); ?></span>
+                      </div>
+                      <div class="flex items-start text-sm">
+                          <i data-lucide="clock" class="w-4 h-4 text-slate-400 mr-2 mt-0.5 shrink-0"></i>
+                          <span class="text-muted"><?php echo date('d M Y, H:i', strtotime($lap['tanggal'])); ?> WITA</span>
+                      </div>
                   </div>
-                  <button
-                    onclick="openModal(1, 'Menunggu', 'Judul Laporan Contoh')"
-                    class="w-full bg-white border border-primary text-primary hover:bg-primary/5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm"
-                  >
-                    Mulai Tangani
+                  <?php if ($lap['status'] === 'Menunggu'): ?>
+                  <button onclick="openModal(<?php echo $lap['id']; ?>, 'Menunggu', '<?php echo addslashes($lap['judul']); ?>')"
+                      class="w-full bg-white border border-primary text-primary hover:bg-primary/5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                      Mulai Tangani
                   </button>
-                </div>
-
-                <!-- Contoh Card: Diproses -->
-                <div class="p-4 bg-white border-l-4 border-info">
-                  <div class="flex justify-between items-start mb-2">
-                    <span
-                      class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info uppercase tracking-wide border border-info/20"
-                      >Diproses</span
-                    >
-                    <span class="text-xs text-muted">01 Jan 2026</span>
-                  </div>
-                  <h4 class="font-bold text-dark text-sm mb-1">
-                    Judul Laporan Contoh 2
-                  </h4>
-                  <p class="text-xs text-muted mb-3">Kategori | #LP-00000002</p>
-                  <div
-                    class="bg-slate-50 rounded-lg p-3 mb-3 border border-slate-100 space-y-2"
-                  >
-                    <div class="flex items-start text-sm">
-                      <i
-                        data-lucide="map-pin"
-                        class="w-4 h-4 text-slate-400 mr-2 mt-0.5 shrink-0"
-                      ></i>
-                      <span class="text-dark font-medium"
-                        >Nama Kelurahan, Kec. Nama Kecamatan</span
-                      >
-                    </div>
-                    <div class="flex items-start text-sm">
-                      <i
-                        data-lucide="clock"
-                        class="w-4 h-4 text-slate-400 mr-2 mt-0.5 shrink-0"
-                      ></i>
-                      <span class="text-muted"
-                        >Dilaporkan: 01 Jan 2026, 10:00 WITA</span
-                      >
-                    </div>
-                  </div>
-                  <button
-                    onclick="openModal(2, 'Diproses', 'Judul Laporan Contoh 2')"
-                    class="w-full bg-primary hover:bg-primary-dark text-white py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm"
-                  >
-                    Update Status
+                  <?php else: ?>
+                  <button onclick="openModal(<?php echo $lap['id']; ?>, 'Diproses', '<?php echo addslashes($lap['judul']); ?>')"
+                      class="w-full bg-primary hover:bg-primary-dark text-white py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                      Update Status
                   </button>
-                </div>
+                  <?php endif; ?>
               </div>
+              <?php
+                      endwhile;
+                  else:
+              ?>
+              <div class="p-10 text-center text-muted">
+                  <div class="flex flex-col items-center">
+                      <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mb-3">
+                          <i data-lucide="check-circle" class="w-7 h-7 text-secondary"></i>
+                      </div>
+                      <p class="font-semibold text-dark">Tidak ada tugas aktif</p>
+                      <p class="text-sm mt-1">Semua laporan telah ditangani.</p>
+                  </div>
+              </div>
+              <?php
+                  endif;
+              }
+              ?>
+          </div>
             </div>
           </div>
         </div>
@@ -809,28 +753,31 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
         });
 
       /* ---- Simpan Status (nanti dihubungkan ke AJAX/PHP) ---- */
-      function simpanStatus() {
-        if (!activeLaporanId || !activeStatusBaru) return;
+        function simpanStatus() {
+            if (!activeLaporanId || !activeStatusBaru) return;
 
-        const catatan = document.getElementById("catatanPetugas").value;
+            const catatan = document.getElementById('catatanPetugas').value;
+            const formData = new FormData();
+            formData.append('id_laporan', activeLaporanId);
+            formData.append('status_baru', activeStatusBaru);
+            formData.append('catatan', catatan);
 
-        /* =====================================================
-               NANTI: ganti blok ini dengan fetch() ke endpoint PHP
-               =====================================================
-               fetch('update_status.php', {
-                   method: 'POST',
-                   body: new FormData(...)
-               }).then(...)
-               ===================================================== */
-
-        // Simulasi sukses untuk preview UI
-        updateRowUI(activeLaporanId, activeStatusBaru);
-        showToast(
-          "success",
-          "Status diperbarui menjadi " + activeStatusBaru + "!",
-        );
-        closeModal();
-      }
+            fetch('update_status.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    updateRowUI(activeLaporanId, activeStatusBaru);
+                    showToast('success', 'Status diperbarui menjadi ' + activeStatusBaru + '!');
+                    closeModal();
+                } else {
+                    showToast('error', 'Gagal: ' + data.message);
+                }
+            })
+            .catch(() => showToast('error', 'Terjadi kesalahan!'));
+        }
 
       /* ---- Update Tampilan Baris Setelah Simpan ---- */
       function updateRowUI(id, statusBaru) {

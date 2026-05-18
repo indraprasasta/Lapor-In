@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = mysqli_real_escape_string($koneksi, $_POST['username']);
     $password = $_POST['password'];
 
-    // pengecekan untuk user dan petugas 
+    // pengecekan untuk user dan petugas
     //cek di bagian user dahulu
     $query = mysqli_query($koneksi, "SELECT * FROM users WHERE username = '$username'");
 
@@ -48,6 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['petugas_nama']     = $petugas['nama'];
                 $_SESSION['petugas_jabatan']  = $petugas['jabatan'];
                 $_SESSION['petugas_dinas']    = $petugas['nama_dinas'];
+                $_SESSION['petugas_dinas_id'] = $petugas['dinas_id'];
                 header("Location: petugas/beranda.php");
                 exit();
             } else {

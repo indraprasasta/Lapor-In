@@ -1,6 +1,17 @@
 <?php
 require __DIR__ . '/database/conection.php';
+// Ambil 3 berita terbaru
 $query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DESC LIMIT 3");
+
+// Ambil 3 laporan yang sudah selesai
+$query_selesai = mysqli_query($koneksi, "
+    SELECT laporan.*, users.nama as nama_pelapor 
+    FROM laporan 
+    JOIN users ON laporan.user_id = users.id
+    WHERE laporan.status = 'Selesai'
+    ORDER BY laporan.tanggal DESC
+    LIMIT 3
+");
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -9,7 +20,7 @@ $query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DE
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LaporIn - Portal Pelaporan Infrastruktur Mataram</title>
 
-    <!-- Hanya untuk bagian Berita & Portofolio (Tailwind) -->
+    <!--CONFIG TAILWIND-->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -38,9 +49,7 @@ $query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DE
 </head>
 <body>
 
-<!-- ========================
-     NAVBAR
-========================= -->
+<!-- NAVBAR -->
 <nav class="navbar">
     <div class="container">
         <div class="navbar__inner">
@@ -190,36 +199,43 @@ $query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DE
             <a href="#" class="text-white border-b border-accent hover:text-accent transition-colors mt-4 lg:mt-0">Lihat Semua Laporan</a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="bg-white rounded-2xl overflow-hidden group">
-                <div class="relative h-56 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80" alt="Jalan Diperbaiki" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    <div class="absolute top-4 right-4 bg-accent text-white text-xs font-bold px-3 py-1 rounded-full">Selesai Diperbaiki</div>
+            <?php if(mysqli_num_rows($query_selesai) > 0): ?>
+                <?php while($selesai = mysqli_fetch_assoc($query_selesai)): ?>
+                <div class="bg-white rounded-2xl overflow-hidden group">
+                    <div class="relative h-56 overflow-hidden">
+                        <?php if(!empty($selesai['foto'])): ?>
+                        <img src="uploads/foto_laporan/<?php echo $selesai['foto']; ?>"
+                            alt="<?php echo htmlspecialchars($selesai['judul']); ?>"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <?php else: ?>
+                        <div class="w-full h-full bg-slate-200 flex items-center justify-center">
+                            <i class="fa-solid fa-image text-4xl text-slate-400"></i>
+                        </div>
+                        <?php endif; ?>
+                        <div class="absolute top-4 right-4 bg-accent text-white text-xs font-bold px-3 py-1 rounded-full">Selesai Diperbaiki</div>
+                        <!-- Badge kategori -->
+                        <div class="absolute bottom-4 left-4 bg-black/50 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+                            <?php echo $selesai['kategori']; ?>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg text-primary mb-2 line-clamp-1"><?php echo htmlspecialchars($selesai['judul']); ?></h3>
+                        <p class="text-sm text-gray-500 mb-1">
+                            <i class="fa-solid fa-map-pin mr-2"></i>
+                            <?php echo $selesai['kelurahan'] . ', ' . $selesai['kecamatan']; ?>
+                        </p>
+                        <p class="text-sm text-gray-500">
+                            <i class="fa-regular fa-calendar mr-2"></i>
+                            <?php echo date('d F Y', strtotime($selesai['tanggal'])); ?>
+                        </p>
+                    </div>
                 </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-lg text-primary mb-2">Penambalan Jl. Majapahit</h3>
-                    <p class="text-sm text-gray-500"><i class="fa-regular fa-calendar mr-2"></i> 12 April 2026</p>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <div class="col-span-3 text-center py-12">
+                    <p class="text-white/60 text-sm">Belum ada laporan yang selesai.</p>
                 </div>
-            </div>
-            <div class="bg-white rounded-2xl overflow-hidden group">
-                <div class="relative h-56 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1595054226583-eb561c210815?auto=format&fit=crop&w=600&q=80" alt="Lampu Diganti" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    <div class="absolute top-4 right-4 bg-accent text-white text-xs font-bold px-3 py-1 rounded-full">Selesai Diperbaiki</div>
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-lg text-primary mb-2">Pergantian PJU Udayana</h3>
-                    <p class="text-sm text-gray-500"><i class="fa-regular fa-calendar mr-2"></i> 08 April 2026</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl overflow-hidden group">
-                <div class="relative h-56 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1605230971032-9c1787d558b0?auto=format&fit=crop&w=600&q=80" alt="Evakuasi Pohon" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    <div class="absolute top-4 right-4 bg-accent text-white text-xs font-bold px-3 py-1 rounded-full">Selesai Diperbaiki</div>
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-lg text-primary mb-2">Evakuasi Pohon Ampenan</h3>
-                    <p class="text-sm text-gray-500"><i class="fa-regular fa-calendar mr-2"></i> 02 April 2026</p>
-                </div>
-            </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -325,9 +341,20 @@ $query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DE
                     <?php endif; ?>
                     <div class="p-6">
                         <p class="text-xs text-accent font-semibold mb-2 uppercase"><?php echo $berita['kategori']; ?></p>
-                        <h3 class="font-bold text-primary text-xl mb-3 hover:text-accent cursor-pointer"><?php echo htmlspecialchars($berita['judul']); ?></h3>
+                        <h3 class="font-bold text-primary text-xl mb-3"><?php echo htmlspecialchars($berita['judul']); ?></h3>
                         <p class="text-gray-600 text-sm mb-4 line-clamp-3"><?php echo substr(strip_tags($berita['isi']), 0, 150) . '...'; ?></p>
-                        <a href="#" class="text-primary text-sm font-bold hover:text-accent">Baca Selengkapnya &rarr;</a>
+                        
+                        <!-- Tombol Baca Selengkapnya dengan data attribute -->
+                        <button 
+                            onclick="bukaBerita(this)"
+                            data-judul="<?php echo htmlspecialchars($berita['judul']); ?>"
+                            data-kategori="<?php echo $berita['kategori']; ?>"
+                            data-tanggal="<?php echo date('d F Y', strtotime($berita['tanggal'])); ?>"
+                            data-isi="<?php echo htmlspecialchars($berita['isi']); ?>"
+                            data-foto="<?php echo !empty($berita['foto']) ? 'uploads/foto_berita/' . $berita['foto'] : ''; ?>"
+                            class="text-primary text-sm font-bold hover:text-accent transition-colors cursor-pointer bg-transparent border-none p-0">
+                            Baca Selengkapnya &rarr;
+                        </button>
                     </div>
                 </article>
                 <?php endwhile; ?>
@@ -486,6 +513,26 @@ $query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DE
         </div>
     </div>
 </footer>
+<!-- POPUP BERITA -->
+<div class="popup-overlay" id="popupBerita" onclick="tutupBerita(event)">
+    <div class="popup-box">
+        <div class="popup-box__wrapper">
+            <button class="popup-box__close" onclick="tutupBeritaBtn()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="popup-img-container"></div>
+        </div>
+        <div class="popup-box__body">
+            <span class="popup-box__kategori" id="popup-kategori"></span>
+            <h2 class="popup-box__judul" id="popup-judul"></h2>
+            <p class="popup-box__meta">
+                <i class="fa-regular fa-calendar"></i>
+                <span id="popup-tanggal"></span>
+            </p>
+            <div class="popup-box__isi" id="popup-isi"></div>
+        </div>
+    </div>
+</div>
 
 <!-- JAVASCRIPT -->
 <script>
@@ -525,6 +572,50 @@ $query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DE
             }
         });
     });
+
+// Popup Berita
+function bukaBerita(btn) {
+    const judul    = btn.getAttribute('data-judul');
+    const kategori = btn.getAttribute('data-kategori');
+    const tanggal  = btn.getAttribute('data-tanggal');
+    const isi      = btn.getAttribute('data-isi');
+    const foto     = btn.getAttribute('data-foto');
+
+    // Isi konten popup
+    document.getElementById('popup-judul').textContent    = judul;
+    document.getElementById('popup-kategori').textContent = kategori;
+    document.getElementById('popup-tanggal').textContent  = tanggal;
+    document.getElementById('popup-isi').innerHTML        = isi.replace(/\n/g, '<br>');
+
+    // Foto
+    const imgContainer = document.getElementById('popup-img-container');
+    if (foto) {
+        imgContainer.innerHTML = `<img src="${foto}" alt="${judul}" class="popup-box__img">`;
+    } else {
+        imgContainer.innerHTML = `<div class="popup-box__img-placeholder"><i class="fa-solid fa-image"></i></div>`;
+    }
+
+    // Buka popup
+    document.getElementById('popupBerita').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function tutupBeritaBtn() {
+    document.getElementById('popupBerita').classList.remove('open');
+    document.body.style.overflow = 'auto';
+}
+
+function tutupBerita(e) {
+    // Tutup hanya jika klik di luar popup-box
+    if (e.target === document.getElementById('popupBerita')) {
+        tutupBeritaBtn();
+    }
+}
+
+// Tutup dengan tombol Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') tutupBeritaBtn();
+});
 </script>
 
 </body>
