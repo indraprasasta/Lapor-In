@@ -102,6 +102,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <a href="daftarBerita.php" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary"></i> Daftar Berita
             </a>
+            <div>
+                <button onclick="toggleDropdownUser()" id="dropdownUserBtn"
+                    class="w-full flex items-center justify-between px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors">
+                    <div class="flex items-center">
+                        <i data-lucide="users" class="w-5 h-5 mr-3 group-hover:text-primary"></i>
+                        Manajemen Pengguna
+                    </div>
+                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300" id="dropdownUserIcon"></i>
+                </button>
+                <div id="dropdownUserMenu" class="hidden ml-4 mt-1 space-y-1 border-l-2 border-slate-100 pl-3">
+                    <a href="datapetugas.php" class="flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-dark hover:bg-slate-50 rounded-lg transition-colors">
+                        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span> Data Petugas
+                    </a>
+                    <a href="datauser.php" class="flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-dark hover:bg-slate-50 rounded-lg transition-colors">
+                        <span class="w-2 h-2 rounded-full bg-info inline-block"></span> Data User
+                    </a>
+                </div>
+            </div>
         </nav>
 
         <div class="p-4 border-t border-slate-200">
@@ -219,6 +237,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 reader.readAsDataURL(input.files[0]);
             }
         }
+        function toggleDropdownUser() {
+        const menu = document.getElementById('dropdownUserMenu');
+        const icon = document.getElementById('dropdownUserIcon');
+        const btn  = document.getElementById('dropdownUserBtn');
+
+        menu.classList.toggle('hidden');
+
+        if (!menu.classList.contains('hidden')) {
+            icon.style.transform = 'rotate(180deg)';
+            btn.classList.add('text-primary', 'bg-primary/5');
+            btn.classList.remove('text-muted');
+        } else {
+            icon.style.transform = 'rotate(0deg)';
+            btn.classList.remove('text-primary', 'bg-primary/5');
+            btn.classList.add('text-muted');
+        }
+    }
     </script>
 </body>
 </html>
