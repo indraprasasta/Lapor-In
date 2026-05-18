@@ -455,7 +455,7 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
               <!-- Mobile Card View -->
               <div class="md:hidden flex flex-col divide-y divide-slate-100">
               <?php
-              $kategori_in    = '';
+              $kategori_in = implode(',', $kategori_list);
               // query ulang untuk mobile (pointer sudah habis)
               if (!empty($kategori_list)) {
                   $q_mobile = mysqli_query($koneksi,
