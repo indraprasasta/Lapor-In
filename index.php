@@ -5,8 +5,8 @@ $query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DE
 
 // Ambil 3 laporan yang sudah selesai
 $query_selesai = mysqli_query($koneksi, "
-    SELECT laporan.*, users.nama as nama_pelapor 
-    FROM laporan 
+    SELECT laporan.*, users.nama as nama_pelapor
+    FROM laporan
     JOIN users ON laporan.user_id = users.id
     WHERE laporan.status = 'Selesai'
     ORDER BY laporan.tanggal DESC
