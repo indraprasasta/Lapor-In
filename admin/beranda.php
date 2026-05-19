@@ -180,6 +180,9 @@ while($row = mysqli_fetch_assoc($query_kecamatan)) {
           ></i>
           Buat Berita
         </a>
+        <a href="daftarBerita.php" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+        <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary"></i> Daftar Berita
+        </a>
         <!-- Dropdown Manajemen User & Petugas -->
         <div>
             <button onclick="toggleDropdownUser()"
@@ -203,7 +206,7 @@ while($row = mysqli_fetch_assoc($query_kecamatan)) {
             </div>
         </div>
         <a
-          href="#"
+          href="kategoriLaporan.php"
           class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
         >
           <i
@@ -211,22 +214,6 @@ while($row = mysqli_fetch_assoc($query_kecamatan)) {
             class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
           ></i>
           Kategori Laporan
-        </a>
-
-        <div
-          class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider"
-        >
-          Sistem
-        </div>
-        <a
-          href="#"
-          class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
-        >
-          <i
-            data-lucide="settings"
-            class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
-          ></i>
-          Pengaturan
         </a>
       </nav>
 
@@ -523,7 +510,8 @@ while($row = mysqli_fetch_assoc($query_kecamatan)) {
               },
           },
       });
-          function toggleDropdownUser() {
+      // function dropdown
+        function toggleDropdownUser() {
         const menu = document.getElementById('dropdownUserMenu');
         const icon = document.getElementById('dropdownUserIcon');
         const btn  = document.getElementById('dropdownUserBtn');

@@ -38,6 +38,7 @@ $total_petugas = mysqli_num_rows($query_petugas);
 
 // Statistik
 $total         = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as t FROM petugas"))['t'];
+$diproses   = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE status = 'Diproses'"))['total'];
 
 // Ambil data dinas untuk filter dropdown
 $query_dinas = mysqli_query($koneksi, "SELECT * FROM dinas ORDER BY nama_dinas ASC");
@@ -348,7 +349,7 @@ $query_dinas = mysqli_query($koneksi, "SELECT * FROM dinas ORDER BY nama_dinas A
                   <i data-lucide="briefcase" class="w-4 h-4"></i>
                 </div>
               </div>
-              <p class="text-2xl font-bold text-info">15</p>
+              <p class="text-2xl font-bold text-info"><?php echo $diproses; ?></p>
               <p class="text-xs text-info/80 font-medium mt-1">
                 Menangani laporan aktif
               </p>

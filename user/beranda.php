@@ -129,7 +129,7 @@ $query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '
 
         <!-- User Info (Bottom Sidebar) -->
         <div class="p-4 border-t border-slate-200">
-            <a href="#" class="flex items-center group">
+            <a href="profile.php" class="flex items-center group">
                 <div
                     class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
                     <img src="<?php echo 'https://ui-avatars.com/api/?name=' . urlencode($username) . '&background=A3B18A&color=ffffff'; ?>"

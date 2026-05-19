@@ -154,11 +154,6 @@ $cfg = $status_cfg[$status_aktif];
             </div>
         </div>
  
-        <div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Pengaturan</div>
-        <a href="profil.php" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-            <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-            Profil Saya
-        </a>
     </nav>
  
     <!-- User Info -->

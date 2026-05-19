@@ -70,6 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         primary: { DEFAULT: '#3A5A40', dark: '#2B4330' },
                         accent: { DEFAULT: '#A3B18A', dark: '#8b9a70' },
                         danger: '#DC2626',
+                        info: "#0284C7",
                         dark: '#1E293B',
                         light: '#F8FAFC',
                         muted: '#94A3B8',
@@ -93,8 +94,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-1">
+            <div
+            class="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >
+            Dashboard
+        </div>
             <a href="beranda.php" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="pie-chart" class="w-5 h-5 mr-3 group-hover:text-primary"></i> Beranda Admin
+            </a>
+            <div
+            class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >
+            Manajemen Data
+            </div>
+            <a
+            href="dataLaporan.php"
+            class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
+            >
+            <i
+                data-lucide="file-text"
+                class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
+            ></i>
+            Data Laporan
             </a>
             <a href="buatBerita.php" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
                 <i data-lucide="plus-circle" class="w-5 h-5 mr-3"></i> Buat Berita
@@ -120,6 +141,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </a>
                 </div>
             </div>
+            <a
+            href="kategoriLaporan.php"
+            class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
+            >
+            <i
+                data-lucide="tags"
+                class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
+            ></i>
+            Kategori Laporan
+            </a>
         </nav>
 
         <div class="p-4 border-t border-slate-200">
@@ -141,7 +172,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <!-- Main -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center px-6 z-30">
+        <header class="h-16 bg-accent border-b border-slate-200 flex items-center px-6 z-30">
             <h1 class="text-lg font-bold text-dark">Buat Berita Baru</h1>
         </header>
 

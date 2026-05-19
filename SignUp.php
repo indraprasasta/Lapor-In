@@ -24,20 +24,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pesan_error = "Pendaftaran Gagal! Username atau NIK sudah terdaftar.";
     } else {
         // 4. Query untuk memasukkan data ke tabel user
-        // PASTIKAN nama kolom ('nama', 'nik', dll) sesuai dengan yang ada di struktur tabel databasemu!
         $query_insert = "INSERT INTO users (nama, nik, username, password, gender, alamat) 
                 VALUES ('$nama', '$nik', '$username', '$password', '$gender', '$alamat')";
 
         // 5. Eksekusi query dan cek hasilnya
         if (mysqli_query($koneksi, $query_insert)) {
             // Jika sukses, arahkan ke halaman login
-            echo "<script>
-                    alert('Pendaftaran Berhasil! Silahkan Login.');
-                    window.location.href = 'login.php';
-                </script>";
-            exit();
+            $pesan_sukses = "Pendaftaran berhasil! Silakan login.";
         } else {
-            $pesan_error = "Terjadi kesalahan sistem: " . mysqli_error($koneksi);
+            $pesan_error = "Terjadi kesalahan sistem!";
         }
     }
 }
@@ -100,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <img src="https://i.pinimg.com/1200x/fc/02/64/fc026433a20db53bc4447d4e41f8f830.jpg" 
         alt="Latar Belakang Kota Mataram"
-        class="absolute w-full h-550px object-cover top-0 left-0 -z-10">
+        class="absolute w-full h-700px object-cover top-0 left-0 -z-10">
 
         <div class="absolute w-full h-full bg-black/40 top-0 left-0 -z-10"></div>
 
@@ -208,6 +203,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
 
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- untuk pesan sukses -->
+<?php if ($pesan_sukses != ""): ?>
+<script>
+Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: 'Berhasil!',
+    text: '<?= $pesan_sukses ?>',
+    confirmButtonColor: '#3A5A40',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+}).then(() => {
+    window.location.href = 'login.php';
+});
+</script>
+<?php endif; ?>
 
 </body>
 

@@ -113,6 +113,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
             <a href="buatBerita.php" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="plus-circle" class="w-5 h-5 mr-3 group-hover:text-primary"></i> Buat Berita
             </a>
+            <a href="daftarBerita.php" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
+            <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary"></i> Daftar Berita
+            </a>
 
             <!-- Dropdown Manajemen Pengguna -->
             <div>
@@ -133,6 +136,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_status'])) {
                     </a>
                 </div>
             </div>
+            <a
+            href="kategoriLaporan.php"
+            class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
+            >
+            <i
+                data-lucide="tags"
+                class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
+            ></i>
+            Kategori Laporan
+            </a>
         </nav>
 
         <div class="p-4 border-t border-slate-200">

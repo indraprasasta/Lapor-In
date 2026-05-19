@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 require __DIR__ . '/../database/conection.php';
 
+$username = $_SESSION['username'];
 $id_user = $_SESSION['user_id'];
 $query   = mysqli_query($koneksi, "SELECT * FROM users WHERE id = '$id_user'");
 $user    = mysqli_fetch_assoc($query);
@@ -125,11 +126,13 @@ $user    = mysqli_fetch_assoc($query);
             <a href="profile.php" class="flex items-center group">
                 <div
                     class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
-                    <img src="https://ui-avatars.com/api/?name=Pak+Andi&background=A3B18A&color=ffffff" alt="Avatar"
-                        class="w-full h-full object-cover">
+                    <img src="<?php echo 'https://ui-avatars.com/api/?name=' . urlencode($username) . '&background=A3B18A&color=ffffff'; ?>"
+                    alt="Avatar" class="w-full h-full object-cover">
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm font-semibold text-dark"><?php echo $user['nama']; ?></p>
+                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">
+                        <?php echo $username; ?>
+                    </p>
                     <p class="text-xs text-muted">Masyarakat</p>
                 </div>
             </a>

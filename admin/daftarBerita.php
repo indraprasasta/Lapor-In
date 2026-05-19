@@ -49,6 +49,7 @@ $total = mysqli_num_rows($query_berita);
                         primary: { DEFAULT: '#3A5A40', dark: '#2B4330' },
                         accent: { DEFAULT: '#A3B18A', dark: '#8b9a70' },
                         danger: '#DC2626',
+                        info: "#0284C7", 
                         dark: '#1E293B',
                         light: '#F8FAFC',
                         muted: '#94A3B8',
@@ -72,8 +73,28 @@ $total = mysqli_num_rows($query_berita);
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-1">
+            <div
+            class="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >
+            Dashboard
+            </div>
             <a href="beranda.php" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="pie-chart" class="w-5 h-5 mr-3 group-hover:text-primary"></i> Beranda Admin
+            </a>
+            <div
+            class="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider"
+            >
+            Manajemen data
+            </div>
+            <a
+            href="dataLaporan.php"
+            class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
+            >
+            <i
+            data-lucide="file-text"
+            class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
+            ></i>
+            Data Laporan
             </a>
             <a href="buatBerita.php" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
                 <i data-lucide="plus-circle" class="w-5 h-5 mr-3 group-hover:text-primary"></i> Buat Berita
@@ -81,8 +102,38 @@ $total = mysqli_num_rows($query_berita);
             <a href="daftarBerita.php" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
                 <i data-lucide="newspaper" class="w-5 h-5 mr-3"></i> Daftar Berita
             </a>
+            <div>
+                <button onclick="toggleDropdownUser()"
+                    class="w-full flex items-center justify-between px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
+                    id="dropdownUserBtn">
+                    <div class="flex items-center">
+                        <i data-lucide="users" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
+                        Manajemen Pengguna
+                    </div>
+                    <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-300" id="dropdownUserIcon"></i>
+                </button>
+                <div id="dropdownUserMenu" class="hidden ml-4 mt-1 space-y-1 border-l-2 border-slate-100 pl-3">
+                    <a href="dataPetugas.php" class="flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-dark hover:bg-slate-50 rounded-lg transition-colors">
+                        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+                        Data Petugas
+                    </a>
+                    <a href="dataUser.php" class="flex items-center gap-2 px-3 py-2 text-sm text-muted hover:text-dark hover:bg-slate-50 rounded-lg transition-colors">
+                        <span class="w-2 h-2 rounded-full bg-info inline-block"></span>
+                        Data User
+                    </a>
+                </div>
+            </div>
+        <a
+        href="kategoriLaporan.php"
+        class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
+        >
+        <i
+            data-lucide="tags"
+            class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
+        ></i>
+        Kategori Laporan
+        </a>
         </nav>
-
         <div class="p-4 border-t border-slate-200">
             <div class="flex items-center mb-4">
                 <div class="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200">
@@ -183,6 +234,24 @@ $total = mysqli_num_rows($query_berita);
                 window.location.href = 'daftarBerita.php?hapus=' + id;
             }
         }
+              // function dropdown
+        function toggleDropdownUser() {
+        const menu = document.getElementById('dropdownUserMenu');
+        const icon = document.getElementById('dropdownUserIcon');
+        const btn  = document.getElementById('dropdownUserBtn');
+
+        menu.classList.toggle('hidden');
+
+        if (!menu.classList.contains('hidden')) {
+            icon.style.transform = 'rotate(180deg)';
+            btn.classList.add('text-primary', 'bg-primary/5');
+            btn.classList.remove('text-muted');
+        } else {
+            icon.style.transform = 'rotate(0deg)';
+            btn.classList.remove('text-primary', 'bg-primary/5');
+            btn.classList.add('text-muted');
+        }
+    }
     </script>
 </body>
 </html>
