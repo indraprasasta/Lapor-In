@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tambah'])) {
         $pesan_error = "Kategori '$nama' sudah ada!";
     } else {
         mysqli_query($koneksi, "INSERT INTO kategori_laporan (nama_kategori, icon, deskripsi) VALUES ('$nama', '$icon', '$deskripsi')");
-        header("Location: kategori_laporan.php?added=1");
+        header("Location: KategoriLaporan.php?added=1");
         exit();
     }
 }
@@ -33,7 +33,7 @@ if (isset($_GET['toggle'])) {
     $aktif  = (int) $_GET['aktif'];
     $baru   = $aktif == 1 ? 0 : 1;
     mysqli_query($koneksi, "UPDATE kategori_laporan SET aktif = '$baru' WHERE id = '$id'");
-    header("Location: kategori_laporan.php");
+    header("Location: KategoriLaporan.php");
     exit();
 }
 
@@ -41,7 +41,7 @@ if (isset($_GET['toggle'])) {
 if (isset($_GET['hapus'])) {
     $id = (int) $_GET['hapus'];
     mysqli_query($koneksi, "DELETE FROM kategori_laporan WHERE id = '$id'");
-    header("Location: kategori_laporan.php?deleted=1");
+    header("Location: KategoriLaporan.php?deleted=1");
     exit();
 }
 
@@ -59,6 +59,8 @@ $total_aktif    = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -187,19 +189,45 @@ $total_aktif    = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as 
 
                 <!-- Notifikasi -->
                 <?php if(isset($_GET['added'])): ?>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg text-sm">
-                    ✅ Kategori berhasil ditambahkan!
-                </div>
-                <?php elseif(isset($_GET['deleted'])): ?>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg text-sm">
-                    ✅ Kategori berhasil dihapus!
-                </div>
+                <script>
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Kategori berhasil ditambahkan',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                </script>
+                <?php endif; ?>
+
+                <?php if(isset($_GET['deleted'])): ?>
+                <script>
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Kategori berhasil dihapus',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                </script>
                 <?php endif; ?>
 
                 <?php if($pesan_error != ""): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg text-sm">
-                    ❌ <?php echo $pesan_error; ?>
-                </div>
+                <script>
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '<?php echo $pesan_error; ?>',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                </script>
                 <?php endif; ?>
 
                 <!-- Grid Kategori -->
@@ -213,7 +241,7 @@ $total_aktif    = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as 
                                 </div>
                                 <div class="flex items-center gap-1">
                                     <!-- Toggle aktif -->
-                                    <a href="kategori_laporan.php?toggle=<?php echo $kat['id']; ?>&aktif=<?php echo $kat['aktif']; ?>"
+                                    <a href="KategoriLaporan.php?toggle=<?php echo $kat['id']; ?>&aktif=<?php echo $kat['aktif']; ?>"
                                         title="<?php echo $kat['aktif'] ? 'Nonaktifkan' : 'Aktifkan'; ?>"
                                         class="p-1.5 rounded-lg <?php echo $kat['aktif'] ? 'text-secondary hover:bg-secondary/10' : 'text-muted hover:bg-slate-100'; ?> transition-colors">
                                         <i data-lucide="<?php echo $kat['aktif'] ? 'toggle-right' : 'toggle-left'; ?>" class="w-5 h-5"></i>
@@ -328,9 +356,7 @@ $total_aktif    = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as 
         });
 
         function hapusKategori(id, nama) {
-            if (confirm('Yakin ingin menghapus kategori "' + nama + '"?\n\nKategori yang sudah digunakan di laporan tidak akan terpengaruh.')) {
-                window.location.href = 'kategori_laporan.php?hapus=' + id;
-            }
+            window.location.href = 'KategoriLaporan.php?hapus=' + id;
         }
     </script>
 </body>

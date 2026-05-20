@@ -211,7 +211,7 @@ $query_dinas = mysqli_query($koneksi, "SELECT * FROM dinas ORDER BY nama_dinas A
             </div>
         </div>
         <a
-          href="#"
+          href="kategoriLaporan.php"
           class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
         >
           <i
@@ -219,22 +219,6 @@ $query_dinas = mysqli_query($koneksi, "SELECT * FROM dinas ORDER BY nama_dinas A
             class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
           ></i>
           Kategori Laporan
-        </a>
-
-        <div
-          class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider"
-        >
-          Sistem
-        </div>
-        <a
-          href="#"
-          class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
-        >
-          <i
-            data-lucide="settings"
-            class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
-          ></i>
-          Pengaturan
         </a>
       </nav>
 
@@ -352,22 +336,6 @@ $query_dinas = mysqli_query($koneksi, "SELECT * FROM dinas ORDER BY nama_dinas A
               <p class="text-2xl font-bold text-info"><?php echo $diproses; ?></p>
               <p class="text-xs text-info/80 font-medium mt-1">
                 Menangani laporan aktif
-              </p>
-            </div>
-            <div
-              class="bg-white p-4 rounded-xl border border-danger/30 shadow-sm bg-danger/5"
-            >
-              <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-semibold text-danger uppercase">
-                  Cuti / Nonaktif
-                </p>
-                <div class="p-1.5 bg-danger/10 rounded text-danger">
-                  <i data-lucide="power-off" class="w-4 h-4"></i>
-                </div>
-              </div>
-              <p class="text-2xl font-bold text-danger">2</p>
-              <p class="text-xs text-danger/80 font-medium mt-1">
-                Tidak dapat ditugaskan    
               </p>
             </div>
           </div>

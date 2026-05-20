@@ -10,6 +10,7 @@ require __DIR__ . '/../database/conection.php';
 
 $admin_nama  = $_SESSION['admin_nama'];
 $pesan_error = "";
+$pesan_berhasil = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $judul    = mysqli_real_escape_string($koneksi, $_POST['judul']);
@@ -40,10 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 VALUES ('$judul', '$isi', '$nama_foto', '$kategori')";
 
         if (mysqli_query($koneksi, $query)) {
-            echo "<script>
-                alert('Berita berhasil dipublikasikan!');
-                window.location.href = 'daftarBerita.php';
-            </script>";
+            header("Location: daftarBerita.php?added=1");
             exit();
         } else {
             $pesan_error = "Gagal menyimpan berita!";
@@ -254,6 +252,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </main>
     </div>
+    <?php if(isset($_GET['added'])): ?>
+    <script>
+    Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: 'Berhasil!',
+    text: '<?php echo $pesan_berhasil; ?>',
+    timer: 2000,
+    showConfirmButton: false
+        });
+    </script>
+    <?php endif; ?>
 
     <script>
         lucide.createIcons();

@@ -119,6 +119,16 @@ $total_users = mysqli_num_rows($query_users);
                     </a>
                 </div>
             </div>
+                    <a
+        href="kategoriLaporan.php"
+        class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group"
+        >
+        <i
+            data-lucide="tags"
+            class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"
+        ></i>
+        Kategori Laporan
+        </a>
         </nav>
 
         <div class="p-4 border-t border-slate-200">

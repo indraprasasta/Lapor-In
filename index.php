@@ -12,6 +12,11 @@ $query_selesai = mysqli_query($koneksi, "
     ORDER BY laporan.tanggal DESC
     LIMIT 3
 ");
+$query_kategori = mysqli_query($koneksi, "
+    SELECT * FROM kategori_laporan 
+    WHERE aktif = 1
+    ORDER BY tanggal_dibuat ASC
+");
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -43,6 +48,7 @@ $query_selesai = mysqli_query($koneksi, "
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
@@ -148,41 +154,29 @@ $query_selesai = mysqli_query($koneksi, "
 
         <div class="services__grid">
 
+        <?php if(mysqli_num_rows($query_kategori) > 0): ?>
+            
+            <?php while($kategori = mysqli_fetch_assoc($query_kategori)): ?>
+                
             <article class="service-card">
-                <div class="service-card__icon"><i class="fa-solid fa-road"></i></div>
-                <h3>Jalan Rusak</h3>
-                <p>Laporkan jalan berlubang, aspal terkelupas, atau trotoar yang membahayakan pengguna jalan dan pejalan kaki.</p>
+                <div class="service-card__icon">
+                    <i data-lucide="<?php echo $kategori['icon']; ?>"></i>
+                </div>
+
+                <h3><?php echo htmlspecialchars($kategori['nama_kategori']); ?></h3>
+
+                <p><?php echo htmlspecialchars($kategori['deskripsi']); ?></p>
             </article>
 
-            <article class="service-card ">
-                <div class="service-card__icon"><i class="fa-solid fa-tree"></i></div>
-                <h3>Pohon Tumbang</h3>
-                <p>Bantu cegah kecelakaan dengan melaporkan pohon rawan tumbang, dahan patah, atau pohon tumbang yang menutupi jalan.</p>
-            </article>
+            <?php endwhile; ?>
 
-            <article class="service-card">
-                <div class="service-card__icon"><i class="fa-regular fa-lightbulb"></i></div>
-                <h3>Lampu Jalan Mati</h3>
-                <p>Beri tahu kami jika ada Penerangan Jalan Umum (PJU) yang padam untuk mengembalikan rasa aman di malam hari.</p>
-            </article>
+        <?php else: ?>
 
-            <article class="service-card">
-                <div class="service-card__icon"><i class="fa-solid fa-building"></i></div>
-                <h3>Fasilitas Umum</h3>
-                <p>Laporkan kerusakan pada fasilitas publik seperti taman kota, halte bus, atau sarana umum lainnya agar segera diperbaiki.</p>
-            </article>
+            <p class="text-center col-span-3 text-gray-400">
+                Belum ada kategori tersedia.
+            </p>
 
-            <article class="service-card ">
-                <div class="service-card__icon"><i class="fa-solid fa-bridge"></i></div>
-                <h3>Jembatan</h3>
-                <p>Informasikan jika ada kerusakan struktur jembatan, aspal berlubang di jembatan, atau pembatas yang membahayakan.</p>
-            </article>
-
-            <article class="service-card ">
-                <div class="service-card__icon"><i class="fa-solid fa-ellipsis"></i></div>
-                <h3>Lainnya</h3>
-                <p>Sampaikan aduan infrastruktur lainnya yang tidak termasuk dalam kategori di atas untuk segera kami tindaklanjuti.</p>
-            </article>
+        <?php endif; ?>
 
         </div>
     </div>
@@ -616,6 +610,9 @@ function tutupBerita(e) {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') tutupBeritaBtn();
 });
+
+lucide.createIcons();
+
 </script>
 
 </body>

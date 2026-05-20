@@ -40,6 +40,7 @@ $total = mysqli_num_rows($query_berita);
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -153,7 +154,7 @@ $total = mysqli_num_rows($query_berita);
 
     <!-- Main -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-30">
+        <header class="h-16 bg-accent border-b border-slate-200 flex items-center justify-between px-6 z-30">
             <h1 class="text-lg font-bold text-dark">Daftar Berita</h1>
             <a href="buatBerita.php"
                 class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors flex items-center gap-2">
@@ -234,7 +235,7 @@ $total = mysqli_num_rows($query_berita);
                 window.location.href = 'daftarBerita.php?hapus=' + id;
             }
         }
-              // function dropdown
+        // function dropdown
         function toggleDropdownUser() {
         const menu = document.getElementById('dropdownUserMenu');
         const icon = document.getElementById('dropdownUserIcon');
