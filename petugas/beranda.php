@@ -26,27 +26,26 @@ if (empty($kategori_list)) {
     $kategori_in = implode(',', $kategori_list);
 
     $query_laporan = mysqli_query($koneksi,
-        "SELECT * FROM laporan 
-         WHERE kategori IN ($kategori_in) 
-         AND status IN ('Menunggu', 'Diproses')
-         ORDER BY tanggal DESC"
+        "SELECT * FROM laporan
+        WHERE kategori IN ($kategori_in)
+        AND status IN ('Menunggu', 'Diproses')
+        ORDER BY tanggal DESC"
     );
 
     $total_ditugaskan = mysqli_fetch_assoc(mysqli_query($koneksi,
-        "SELECT COUNT(*) as total FROM laporan 
-         WHERE kategori IN ($kategori_in)"))['total'];
+        "SELECT COUNT(*) as total FROM laporan
+        WHERE kategori IN ($kategori_in)"))['total'];
 
     $sedang_diproses = mysqli_fetch_assoc(mysqli_query($koneksi,
-        "SELECT COUNT(*) as total FROM laporan 
-         WHERE kategori IN ($kategori_in) AND status = 'Diproses'"))['total'];
+        "SELECT COUNT(*) as total FROM laporan
+        WHERE kategori IN ($kategori_in) AND status = 'Diproses'"))['total'];
 
     $selesai_ditangani = mysqli_fetch_assoc(mysqli_query($koneksi,
-        "SELECT COUNT(*) as total FROM laporan 
-         WHERE kategori IN ($kategori_in) AND status = 'Selesai'"))['total'];
+        "SELECT COUNT(*) as total FROM laporan
+        WHERE kategori IN ($kategori_in) AND status = 'Selesai'"))['total'];
 }
 
 $petugas_nama    = $_SESSION['petugas_nama'];
-$petugas_jabatan = $_SESSION['petugas_jabatan'];
 $petugas_dinas   = $_SESSION['petugas_dinas'];
 ?>
 <!doctype html>
@@ -147,6 +146,10 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
         <span class="text-primary font-extrabold text-2xl tracking-tight"
           >Lapor<span class="text-accent">In</span></span
         >
+        <span
+          class="ml-2 text-[10px] font-bold text-white bg-primary px-2 py-0.5 rounded-full uppercase tracking-wider"
+          >Petugas</span
+        >
       </div>
 
       <!-- Nav -->
@@ -224,16 +227,16 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
       <div class="p-4 border-t border-slate-200">
         <a href="#" class="flex items-center group">
           <div
-            class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200"
-          >
-            <!-- Avatar diisi dinamis nanti -->
-            <i data-lucide="user" class="w-5 h-5 text-muted"></i>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">
-                <?php echo $petugas_nama; ?>
-            </p>
-            <p class="text-xs text-muted"><?php echo $petugas_jabatan; ?></p>
+                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
+                    <img src="<?php echo 'https://ui-avatars.com/api/?name=' . urlencode($petugas_nama) . '&background=A3B18A&color=ffffff'; ?>"
+                    alt="Avatar" class="w-full h-full object-cover">
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">
+                        <?php echo $petugas_nama; ?>
+                    </p>
+                    <p class="text-xs text-muted">Petugas</p>
+                </div>
         </div>
         </a>
         <a
@@ -276,7 +279,7 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
                   Selamat Bertugas, <?php echo $petugas_nama; ?>
               </h2>
               <p class="text-muted mt-1 text-sm">
-                  <?php echo $petugas_jabatan; ?> — <?php echo $petugas_dinas; ?>
+                — <?php echo $petugas_dinas; ?>
               </p>
             </div>
           </div>
@@ -343,7 +346,7 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
                 Tugas Aktif
               </h3>
               <a
-                href="daftarTugas.php"
+                href="pengaduan.php?status=Selesai"
                 class="text-sm font-medium text-accent hover:text-accent-dark transition-colors"
               >
                 Lihat Semua &rarr;

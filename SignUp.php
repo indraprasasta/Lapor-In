@@ -62,8 +62,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3A5A40',   /* Hijau Tua */
-                        accent: '#A3B18A',    /* Hijau Muda */
+                        primary: '#3A5A40',
+                        accent: '#A3B18A',
                         graybg: '#f8fafc',
                     },
                     fontFamily: {

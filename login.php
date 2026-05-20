@@ -158,7 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                     <!-- Forgot Password -->
                 <div class="mt-2 ml-2">
-                    <a href="#" class="text-[11px] text-accent hover:text-primary transition-colors hover:underline">Lupa Password?</a>
+                    <a href="lupaPassword.php" class="text-[11px] text-accent hover:text-primary transition-colors hover:underline">Lupa Password?</a>
                 </div>
 
                 <!-- Submit Button -->
