@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
     $nik          = mysqli_real_escape_string($koneksi, $_POST['nik']);
     $username     = mysqli_real_escape_string($koneksi, $_POST['username']);
-    $password     = $_POST['password'];
+    $password_hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $gender       = mysqli_real_escape_string($koneksi, $_POST['gender']);
     $alamat       = mysqli_real_escape_string($koneksi, $_POST['alamat']);
 
@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // 4. Query untuk memasukkan data ke tabel user
         $query_insert = "INSERT INTO users (nama, nik, username, password, gender, alamat) 
-                VALUES ('$nama', '$nik', '$username', '$password', '$gender', '$alamat')";
+                VALUES ('$nama', '$nik', '$username', '$password_hash', '$gender', '$alamat')";
 
         // 5. Eksekusi query dan cek hasilnya
         if (mysqli_query($koneksi, $query_insert)) {

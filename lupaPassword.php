@@ -76,11 +76,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && $_POST['st
     } else {
         $id    = $_SESSION['reset_id'];
         $role  = $_SESSION['reset_role'];
-        $pass  = mysqli_real_escape_string($koneksi, $password_baru);
+        $password_hash = password_hash($password_baru, PASSWORD_DEFAULT);
         $tabel = $role === 'petugas' ? 'petugas' : 'users';
 
         $update = mysqli_query($koneksi,
-            "UPDATE $tabel SET password = '$pass' WHERE id = '$id'"
+            "UPDATE $tabel SET password = '$password_hash' WHERE id = '$id'"
         );
 
         if ($update) {

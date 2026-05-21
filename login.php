@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (mysqli_num_rows($query) == 1) {
         $data = mysqli_fetch_assoc($query);
-        if ($data['password'] == $password) {
+        if (password_verify($password, $data['password'])) {
             $_SESSION['user_id']  = $data['id'];
             $_SESSION['username'] = $data['username'];
             $_SESSION['nama']     = $data['nama'];
@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (mysqli_num_rows($query_petugas) == 1) {
             $petugas = mysqli_fetch_assoc($query_petugas);
-            if ($petugas['password'] == $password) {
+            if (password_verify($password, $petugas['password'])) {
                 $_SESSION['petugas_id']       = $petugas['id'];
                 $_SESSION['petugas_username'] = $petugas['username'];
                 $_SESSION['petugas_nama']     = $petugas['nama'];
