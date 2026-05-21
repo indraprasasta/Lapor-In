@@ -322,7 +322,7 @@ $laporan = mysqli_fetch_assoc($query_laporan);
     </div>
 
     <!-- Modal Update Status -->
-    <div id="statusModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-dark/60">
+    <div id="statusModal" class="hidden fixed inset-0 z-[100] items-center justify-center p-4 bg-dark/60">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
                 <h3 class="font-bold text-dark">Ubah Status Laporan</h3>

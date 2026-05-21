@@ -336,7 +336,7 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
         </main>
     </div>
 
-    <div id="modalHapus" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <div id="modalHapus" class="hidden fixed inset-0 bg-black/50 z-50 items-center justify-center">
         <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
             
             <h3 class="text-lg font-bold text-dark mb-2">Hapus Laporan</h3>
