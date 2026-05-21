@@ -379,7 +379,9 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
                   <tbody id="taskTableBody" class="text-sm divide-y divide-slate-100">
                       <?php if($query_laporan && mysqli_num_rows($query_laporan) > 0): ?>
                           <?php while($laporan = mysqli_fetch_assoc($query_laporan)): ?>
-                          <tr class="hover:bg-slate-50 transition-colors" id="row-<?php echo $laporan['id']; ?>">
+                          <!-- Tambah onclick ke <tr> -->
+                          <tr class="hover:bg-slate-50 transition-colors cursor-pointer" id="row-<?php echo $laporan['id']; ?>"
+                              onclick="window.location='detailLaporan.php?id=<?php echo $laporan['id']; ?>&from=beranda'">
                               <td class="py-4 px-4 align-top">
                                   <div class="flex items-start">
                                       <div class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center mr-3 shrink-0 border border-slate-200">

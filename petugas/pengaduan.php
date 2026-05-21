@@ -242,7 +242,8 @@ $cfg = $status_cfg[$status_aktif];
                         <tbody id="taskTableBody" class="text-sm divide-y divide-slate-100">
                             <?php if ($query_laporan && mysqli_num_rows($query_laporan) > 0): ?>
                                 <?php while ($lap = mysqli_fetch_assoc($query_laporan)): ?>
-                                <tr class="hover:bg-slate-50 transition-colors" id="row-<?php echo $lap['id']; ?>">
+                                <tr class="hover:bg-slate-50 transition-colors cursor-pointer" id="row-<?php echo $lap['id']; ?>"
+                                onclick="window.location='detailLaporan.php?id=<?php echo $lap['id']; ?>&from=<?php echo $status_aktif; ?>'">
                                     <td class="py-4 px-4 align-top">
                                         <div class="flex items-start gap-3">
                                             <div class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200">
@@ -271,12 +272,12 @@ $cfg = $status_cfg[$status_aktif];
                                     <?php if (in_array($status_aktif, ['Menunggu', 'Diproses'])): ?>
                                     <td class="py-4 px-4 align-top text-center" id="aksi-<?php echo $lap['id']; ?>">
                                         <?php if ($status_aktif === 'Menunggu'): ?>
-                                        <button onclick="openModal(<?php echo $lap['id']; ?>, 'Menunggu', '<?php echo addslashes($lap['judul']); ?>')"
+                                        <button onclick="event.stopPropagation();openModal(<?php echo $lap['id']; ?>, 'Menunggu', '<?php echo addslashes($lap['judul']); ?>')"
                                             class="bg-white border border-primary text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-full shadow-sm">
                                             Mulai Proses
                                         </button>
                                         <?php else: ?>
-                                        <button onclick="openModal(<?php echo $lap['id']; ?>, 'Diproses', '<?php echo addslashes($lap['judul']); ?>')"
+                                        <button onclick="event.stopPropagation();openModal(<?php echo $lap['id']; ?>, 'Diproses', '<?php echo addslashes($lap['judul']); ?>')"
                                             class="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors w-full shadow-sm">
                                             Update Status
                                         </button>
