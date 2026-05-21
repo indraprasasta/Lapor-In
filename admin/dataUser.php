@@ -26,7 +26,6 @@ if (isset($_GET['hapus'])) {
 
     // Hapus user
     mysqli_query($koneksi, "DELETE FROM users WHERE id = '$id_hapus'");
-
     header("Location: datauser.php?deleted=1");
     exit();
 }
@@ -55,6 +54,7 @@ $total_users = mysqli_num_rows($query_users);
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -296,10 +296,24 @@ $total_users = mysqli_num_rows($query_users);
         }
 
         function konfirmasiHapus(id, nama) {
-            if (confirm('Yakin ingin menghapus user "' + nama + '"?\n\nSemua laporan milik user ini juga akan dihapus!')) {
-                window.location.href = 'datauser.php?hapus=' + id;
-            }
+    Swal.fire({
+        title: 'Hapus User?',
+        html: `Yakin ingin menghapus user <strong>${nama}</strong>?<br><br>
+            <span class="text-sm text-gray-500">Semua laporan milik user ini juga akan dihapus secara permanen.</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#DC2626',
+        cancelButtonColor: '#94A3B8',
+        reverseButtons: true,
+        width: 400,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'datauser.php?hapus=' + id;
         }
+    });
+}
     </script>
 </body>
 </html>

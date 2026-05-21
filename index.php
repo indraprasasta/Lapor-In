@@ -53,6 +53,20 @@ $query_kategori = mysqli_query($koneksi, "
     <!-- CSS -->
     <link rel="stylesheet" href="src/style.css">
 </head>
+<!-- untuk animasi transisi pada saat muncul -->
+<style>
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+</style>
 <body>
 
 <!-- NAVBAR -->
@@ -124,11 +138,11 @@ $query_kategori = mysqli_query($koneksi, "
     <div class="container">
         <div class="about__grid">
 
-            <div class="about__images">
+            <div class="about__images reveal reveal-delay-1">
                 <img src="https://images.unsplash.com/photo-1760331339913-4c915f2ac5c5?q=80&w=688&auto=format&fit=crop" alt="Infrastruktur Mataram">
             </div>
 
-            <div class="about__text">
+            <div class="about__text reveal reveal-delay-2">
                 <h2 class="section__title">Tentang <span>LaporIn</span></h2>
                 <p>
                     LaporIn adalah inisiatif digital yang menjembatani warga Kota Mataram dengan instansi terkait untuk menciptakan infrastruktur kota yang tangguh. Kami percaya bahwa setiap warga memiliki peran penting dalam memelihara keindahan dan keamanan lingkungan.
@@ -146,20 +160,20 @@ $query_kategori = mysqli_query($koneksi, "
 
 <!-- LAYANAN -->
 <section class="section section--white" id="layanan">
-    <div class="container">
+    <div class="container reveal reveal-delay-1">
         <header class="services__head">
             <span class="section__label">Apa Yang Bisa Dilaporkan?</span>
             <h2 class="section__title">Layanan Pengaduan Kami</h2>
         </header>
 
-        <div class="services__grid">
+        <div class="services__grid reveal reveal-delay-1">
 
         <?php if(mysqli_num_rows($query_kategori) > 0): ?>
             
             <?php while($kategori = mysqli_fetch_assoc($query_kategori)): ?>
                 
             <article class="service-card">
-                <div class="service-card__icon">
+                <div class="service-card__icon reveal reveal-delay-2">
                     <i data-lucide="<?php echo $kategori['icon']; ?>"></i>
                 </div>
 
@@ -186,13 +200,13 @@ $query_kategori = mysqli_query($koneksi, "
 <section id="portofolio" class="py-20 bg-primary">
     <div class="container mx-auto px-4 lg:px-8">
         <div class="flex flex-col lg:flex-row justify-between items-end mb-12">
-            <div>
+            <div class="reveal reveal-delay-1">
                 <span class="text-accent font-semibold tracking-wider uppercase text-sm">Aksi Nyata</span>
                 <h2 class="text-3xl lg:text-4xl font-bold text-white mt-2">Laporan Terselesaikan</h2>
             </div>
             <a href="#" class="text-white border-b border-accent hover:text-accent transition-colors mt-4 lg:mt-0">Lihat Semua Laporan</a>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal reveal-delay-2">
             <?php if(mysqli_num_rows($query_selesai) > 0): ?>
                 <?php while($selesai = mysqli_fetch_assoc($query_selesai)): ?>
                 <div class="bg-white rounded-2xl overflow-hidden group">
@@ -243,22 +257,22 @@ $query_kategori = mysqli_query($koneksi, "
         </header>
 
         <div class="howto__steps">
-            <div class="howto__step">
+            <div class="howto__step reveal reveal-delay-1">
                 <div class="howto__circle">1</div>
                 <h4>Ambil Foto</h4>
                 <p>Foto infrastruktur yang rusak dengan jelas.</p>
             </div>
-            <div class="howto__step">
+            <div class="howto__step reveal reveal-delay-2">
                 <div class="howto__circle">2</div>
                 <h4>Detail Alamat</h4>
                 <p>Berikan alamat spesifik & deskripsi kerusakannya.</p>
             </div>
-            <div class="howto__step">
+            <div class="howto__step reveal reveal-delay-3">
                 <div class="howto__circle">3</div>
                 <h4>Waktu Kejadian</h4>
                 <p>Cantumkan tanggal & jam pantauan Anda.</p>
             </div>
-            <div class="howto__step">
+            <div class="howto__step reveal reveal-delay-4">
                 <div class="howto__circle howto__circle--filled">
                     <i class="fa-solid fa-check"></i>
                 </div>
@@ -272,11 +286,11 @@ $query_kategori = mysqli_query($koneksi, "
 <!-- FAQ ITEM -->
 <section class="section section--white" id="faq">
     <div class="container">
-        <header class="faq__head">
+        <header class="faq__head reveal reveal-delay-1">
             <h2 class="section__title">Pertanyaan Umum (FAQ)</h2>
         </header>
 
-        <ul class="faq__list">
+        <ul class="faq__list reveal reveal-delay-2">
             <li class="faq__item">
                 <button class="faq__btn" aria-expanded="false">
                     Bagaimana cara melampirkan foto laporan?
@@ -312,7 +326,7 @@ $query_kategori = mysqli_query($koneksi, "
 <section id="blog" class="py-20 bg-gray-50">
     <div class="container mx-auto px-4 lg:px-8">
         <div class="flex justify-between items-end mb-12">
-            <div>
+            <div class="reveal reveal-delay-1">
                 <h2 class="text-3xl lg:text-4xl font-bold text-primary mb-2">Kabar Mataram</h2>
                 <p class="text-gray-600">Berita terbaru seputar pembangunan dan infrastruktur kota.</p>
             </div>
@@ -320,7 +334,7 @@ $query_kategori = mysqli_query($koneksi, "
                 Lihat Semua Berita <i class="fa-solid fa-arrow-right ml-1"></i>
             </a>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 reveal reveal-delay-2">
             <?php if(mysqli_num_rows($query_berita) > 0): ?>
                 <?php while($berita = mysqli_fetch_assoc($query_berita)): ?>
                 <article class="bg-white rounded-2xl overflow-hidden shadow-sm">
@@ -371,7 +385,7 @@ $query_kategori = mysqli_query($koneksi, "
             <rect width="100%" height="100%" fill="url(#dots)"></rect>
         </svg>
     </div>
-    <div class="container cta__inner">
+    <div class="container cta__inner reveal reveal-delay-1">
         <h2>Siap Melaporkan Masalah?</h2>
         <p>Siapkan foto bukti, alamat lengkap, deskripsi singkat, serta tanggal dan waktu kejadian. Mari bersinergi membangun kota ini.</p>
         <a href="login.php" class="btn--primary-cta">
@@ -382,7 +396,7 @@ $query_kategori = mysqli_query($koneksi, "
 
 <!-- CONTACT -->
 <section class="section section--white" id="kontak">
-    <div class="container">
+    <div class="container reveal reveal-delay-1">
         <div class="contact__grid">
 
             <div class="contact__info">
@@ -473,7 +487,7 @@ $query_kategori = mysqli_query($koneksi, "
                 </ul>
             </div>
 
-            <div class="footer__col">
+            <div class="footer__col reveal reveal-delay-1">
                 <h4>Darurat Mataram</h4>
                 <div class="footer__emergency">
                     <div class="footer__emergency-item">
@@ -612,6 +626,24 @@ document.addEventListener('keydown', (e) => {
 });
 
 lucide.createIcons();
+// Scroll Reveal
+window.addEventListener('load', function () {
+    const revealElements = document.querySelectorAll('.reveal');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    revealElements.forEach(el => observer.observe(el));
+});
 
 </script>
 
