@@ -35,7 +35,15 @@ if (isset($_GET['hapus'])) {
 $search = isset($_GET['search']) ? mysqli_real_escape_string($koneksi, $_GET['search']) : '';
 $where  = $search != '' ? "WHERE nama LIKE '%$search%' OR username LIKE '%$search%'" : '';
 
-$query_users = mysqli_query($koneksi, "SELECT * FROM users $where ORDER BY id DESC");
+// Ambil data user beserta total laporannya
+$query_users = mysqli_query($koneksi, "
+    SELECT users.*, COUNT(laporan.id) as total_laporan
+    FROM users
+    LEFT JOIN laporan ON users.id = laporan.user_id
+    $where
+    GROUP BY users.id
+    ORDER BY users.id DESC
+");
 $total_users = mysqli_num_rows($query_users);
 ?>
 <!DOCTYPE html>
@@ -205,7 +213,7 @@ $total_users = mysqli_num_rows($query_users);
                                     <th class="py-3 px-4 font-semibold">Username</th>
                                     <th class="py-3 px-4 font-semibold">Gender</th>
                                     <th class="py-3 px-4 font-semibold">Alamat</th>
-                                    <th class="py-3 px-4 font-semibold">Password</th>
+                                    <th class="py-3 px-4 font-semibold text-center">Total Laporan</th>
                                     <th class="py-3 px-4 text-center font-semibold">Aksi</th>
                                 </tr>
                             </thead>
@@ -239,8 +247,11 @@ $total_users = mysqli_num_rows($query_users);
                                         <td class="py-4 px-4 text-muted text-xs max-w-[180px]">
                                             <p class="line-clamp-2"><?php echo $user['alamat']; ?></p>
                                         </td>
-                                        <td class="py-4 px-4 font-mono text-xs text-slate-500">
-                                            <?php echo $user['password']; ?>
+                                        <td class="py-4 px-4 text-center">
+                                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold
+                                                <?php echo $user['total_laporan'] > 0 ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-muted'; ?>">
+                                                <?php echo $user['total_laporan']; ?>
+                                            </span>
                                         </td>
                                         <td class="py-4 px-4 text-center">
                                             <button onclick="konfirmasiHapus(<?php echo $user['id']; ?>, '<?php echo addslashes($user['nama']); ?>')"
