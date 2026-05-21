@@ -15,6 +15,7 @@ $user_id = $_SESSION['user_id'];
 $query_user = mysqli_query($koneksi, "SELECT * FROM users WHERE id = '$user_id'");
 $user       = mysqli_fetch_assoc($query_user);
 $pesan_error = "";
+$pesan_sukses = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
@@ -51,11 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 VALUES ('$user_id', '$judul', '$kategori', '$deskripsi', '$nama_foto', '$alamat', '$kecamatan', '$kelurahan', '$latitude', '$longitude')";
 
         if (mysqli_query($koneksi, $query)) {
-            echo "<script>
-                alert('Laporan berhasil dikirim!');
-                window.location.href = 'daftarLaporan.php';
-            </script>";
-            exit();
+            $pesan_sukses = "Laporan berhasil dikirim!";
         } else {
             $pesan_error = "Gagal menyimpan laporan: " . mysqli_error($koneksi);
         }
@@ -83,6 +80,7 @@ $query_kat = mysqli_query($koneksi, "SELECT * FROM kategori_laporan WHERE aktif 
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Leaflet CSS for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Tailwind Config to match LaporIn Design System -->
     <script>
@@ -381,7 +379,21 @@ $query_kat = mysqli_query($koneksi, "SELECT * FROM kategori_laporan WHERE aktif 
             </div>
         </main>
     </div>
-
+    
+    <!-- tampilan jika berhasil dikirim -->
+    <?php if ($pesan_sukses): ?>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                width: 350,
+                position: 'top-end',
+                text: '<?php echo $pesan_sukses; ?>',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        </script>
+    <?php endif; ?>
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Script Logic -->

@@ -318,10 +318,7 @@ $total_laporan = mysqli_num_rows($query_laporan);
                                 </td>
                                 <td class="py-4 px-4 align-top text-center">
                                     <div class="flex items-center justify-center gap-2">
-                                        <button type="button" onclick="openDeleteModal(<?php echo $laporan['id']; ?>, '<?php echo addslashes($laporan['judul']); ?>')"
-                                            class="text-danger hover:text-danger p-1.5 rounded-lg hover:bg-danger/10 transition-colors inline-block">
-                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                        </button>
+                                       <i data-lucide="trash-2" class="w-5 h-5"></i>
                                     </div>
                                 </td>
                             </tr>
@@ -427,44 +424,8 @@ $total_laporan = mysqli_num_rows($query_laporan);
         </main>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <!-- Modal Header -->
-            <div class="p-6 border-b border-slate-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center">
-                        <i data-lucide="alert-circle" class="w-6 h-6 text-danger"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-dark">Hapus Laporan</h3>
-                </div>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="p-6">
-                <p class="text-muted mb-2">Anda yakin ingin menghapus laporan berikut?</p>
-                <p id="deleteReportTitle" class="font-semibold text-dark bg-slate-50 p-3 rounded-lg border border-slate-200"></p>
-                <p class="text-xs text-muted mt-4">Tindakan ini tidak dapat dibatalkan. Laporan dan semua data terkait akan dihapus secara permanen.</p>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="p-6 border-t border-slate-200 flex gap-3">
-                <button type="button" onclick="closeDeleteModal()"
-                    class="flex-1 px-4 py-2 bg-slate-100 text-dark rounded-lg font-semibold hover:bg-slate-200 transition-colors">
-                    Batal
-                </button>
-                <button type="button" id="confirmDeleteBtn" onclick="confirmDelete()"
-                    class="flex-1 px-4 py-2 bg-danger text-white rounded-lg font-semibold hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    Hapus
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Script Logic -->
     <script>
-        let deleteReportId = null;
 
         // Initialize Lucide Icons
         lucide.createIcons();
@@ -482,58 +443,6 @@ $total_laporan = mysqli_num_rows($query_laporan);
                 overlay.classList.add('hidden');
                 document.body.style.overflow = 'auto';
             }
-        }
-
-        // Delete Modal Functions
-        function openDeleteModal(reportId, reportTitle) {
-            deleteReportId = reportId;
-            document.getElementById('deleteReportTitle').textContent = reportTitle;
-            document.getElementById('deleteModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeDeleteModal() {
-            deleteReportId = null;
-            document.getElementById('deleteModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        function confirmDelete() {
-            if (!deleteReportId) return;
-
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Menghapus...';
-
-            // Send delete request
-            fetch('proses_delete_laporan.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'id=' + deleteReportId
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    alert('Laporan berhasil dihapus');
-                    // Reload page
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                    confirmBtn.disabled = false;
-                    confirmBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i> Hapus';
-                    lucide.createIcons();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan saat menghapus laporan');
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i> Hapus';
-                lucide.createIcons();
-            });
         }
 
         // Close modal when clicking outside

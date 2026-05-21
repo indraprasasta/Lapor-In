@@ -40,12 +40,8 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
     }
     
     // Hapus dari database
-    mysqli_query($koneksi, "DELETE FROM laporan WHERE id = '$id_laporan' AND user_id = '$user_id'");
-    
-    echo "<script>
-        alert('Laporan berhasil dihapus!');
-        window.location.href = 'daftarLaporan.php';
-    </script>";
+    mysqli_query($koneksi, "DELETE FROM laporan WHERE id = '$id_laporan' AND user_id = '$user_id'");   
+    header("Location: daftarLaporan.php?hapus=success");
     exit();
 }
 ?>
@@ -65,6 +61,7 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Tailwind Config to match LaporIn Design System -->
     <script>
@@ -256,14 +253,14 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
                         </div>
                     </div>
 
-                    <!-- Tombol Edit/Hapus hanya muncul jika status MENUNGGU (Disembunyikan di contoh ini karena status DIPROSES) -->                
-                    <?php if($laporan['status'] == 'Menunggu'): ?>
+                    <!-- Tombol Edit/Hapus -->
+                    <?php if($laporan['status'] == 'Menunggu' || $laporan['status'] == 'Selesai'): ?>
                     <div class="flex items-center gap-2">
                         <a href="editLaporan.php?id=<?php echo $laporan['id']; ?>"
                             class="px-4 py-2 bg-white border border-slate-300 text-dark font-medium rounded-lg hover:bg-slate-50 transition-colors flex items-center text-sm shadow-sm">
                             <i data-lucide="edit" class="w-4 h-4 mr-2"></i> Edit
                         </a>
-                        <button onclick="konfirmasiHapus()"
+                        <button onclick="bukaModalHapus()"
                             class="px-4 py-2 bg-white border border-danger text-danger font-medium rounded-lg hover:bg-danger/5 transition-colors flex items-center text-sm shadow-sm">
                             <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus
                         </button>
@@ -339,6 +336,29 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
         </main>
     </div>
 
+    <div id="modalHapus" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+            
+            <h3 class="text-lg font-bold text-dark mb-2">Hapus Laporan</h3>
+            <p class="text-sm text-muted mb-4">
+                Apakah kamu yakin ingin menghapus laporan ini?
+            </p>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="tutupModalHapus()"
+                    class="px-4 py-2 bg-slate-200 rounded-lg text-sm">
+                    Batal
+                </button>
+
+                <button onclick="hapusLaporan()"
+                    class="px-4 py-2 bg-danger text-white rounded-lg text-sm">
+                    Hapus
+                </button>
+            </div>
+
+        </div>
+    </div>
+
     <!-- Script Logic -->
     <script>
         // Initialize Lucide Icons
@@ -359,10 +379,16 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
             }
         }
 
-        function konfirmasiHapus() {
-        if (confirm('Apakah Anda yakin ingin menghapus laporan ini?')) {
-            window.location.href = 'detailLaporan.php?id=<?php echo $laporan['id']; ?>&hapus=true';
-        }
+    function bukaModalHapus() {
+    document.getElementById('modalHapus').classList.remove('hidden');
+    }
+
+    function tutupModalHapus() {
+        document.getElementById('modalHapus').classList.add('hidden');
+    }
+
+    function hapusLaporan() {
+        window.location.href = 'detailLaporan.php?id=<?php echo $laporan['id']; ?>&hapus=true';
     }
     </script>
 </body>

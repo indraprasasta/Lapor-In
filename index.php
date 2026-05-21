@@ -13,7 +13,7 @@ $query_selesai = mysqli_query($koneksi, "
     LIMIT 3
 ");
 $query_kategori = mysqli_query($koneksi, "
-    SELECT * FROM kategori_laporan 
+    SELECT * FROM kategori_laporan
     WHERE aktif = 1
     ORDER BY tanggal_dibuat ASC
 ");
@@ -51,7 +51,7 @@ $query_kategori = mysqli_query($koneksi, "
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
 
