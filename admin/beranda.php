@@ -39,6 +39,11 @@ while($row = mysqli_fetch_assoc($query_kecamatan)) {
     $kecamatan_labels[] = $row['kecamatan'];
     $kecamatan_data[]   = $row['total'];
 }
+
+// Notifikasi: laporan menunggu validasi
+$notif_count = mysqli_fetch_assoc(mysqli_query($koneksi,
+    "SELECT COUNT(*) as total FROM laporan WHERE status = 'Menunggu'"
+))['total'];
 ?>
 <!doctype html>
 <html lang="id">
@@ -259,7 +264,54 @@ while($row = mysqli_fetch_assoc($query_kecamatan)) {
           <h1 class="text-lg font-bold text-dark">
             Ringkasan Sistem Pelaporan
           </h1>
-        </div>
+          </div>
+          <div class="ml-auto relative">
+          <button onclick="toggleNotif()" class="relative p-2 text-dark hover:text-primary rounded-full hover:bg-white/40 transition-colors">
+              <i data-lucide="bell" class="w-5 h-5"></i>
+              <?php if($notif_count > 0): ?>
+              <span class="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-white text-[10px] font-bold">
+                  <?php echo $notif_count > 99 ? '99+' : $notif_count; ?>
+              </span>
+              <?php endif; ?>
+          </button>
+
+          <!-- Dropdown Notifikasi -->
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
+              <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <h4 class="font-bold text-dark text-sm">Notifikasi</h4>
+                  <?php if($notif_count > 0): ?>
+                  <span class="text-xs bg-danger/10 text-danger font-semibold px-2 py-0.5 rounded-full">
+                      <?php echo $notif_count; ?> menunggu
+                  </span>
+                  <?php endif; ?>
+              </div>
+              <div class="max-h-64 overflow-y-auto">
+                  <?php if($notif_count > 0): ?>
+                  <a href="dataLaporan.php?status=Menunggu" class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                      <div class="w-9 h-9 rounded-full bg-warning/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <i data-lucide="clock" class="w-4 h-4 text-warning"></i>
+                      </div>
+                      <div>
+                          <p class="text-sm font-semibold text-dark">Laporan Menunggu Validasi</p>
+                          <p class="text-xs text-muted mt-0.5">
+                              <span class="font-bold text-warning"><?php echo $notif_count; ?></span> laporan belum diproses
+                          </p>
+                      </div>
+                  </a>
+                  <?php else: ?>
+                  <div class="px-4 py-8 text-center text-muted">
+                      <i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2 text-secondary"></i>
+                      <p class="text-sm font-medium">Tidak ada notifikasi baru</p>
+                  </div>
+                  <?php endif; ?>
+              </div>
+              <div class="px-4 py-2 border-t border-slate-100">
+                  <a href="dataLaporan.php" class="text-xs text-primary font-semibold hover:underline">
+                      Lihat semua laporan →
+                  </a>
+              </div>
+          </div>
+      </div>
       </header>
 
       <!-- Main Content -->
@@ -528,6 +580,20 @@ while($row = mysqli_fetch_assoc($query_kecamatan)) {
             btn.classList.add('text-muted');
         }
     }
+    // Toggle dropdown notifikasi
+    function toggleNotif() {
+        const dropdown = document.getElementById('notifDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Tutup dropdown jika klik di luar
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('notifDropdown');
+        const btn = e.target.closest('button[onclick="toggleNotif()"]');
+        if (!btn && dropdown && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
     </script>
   </body>
 </html>

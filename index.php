@@ -396,12 +396,14 @@ $query_kategori = mysqli_query($koneksi, "
 
 <!-- CONTACT -->
 <section class="section section--white" id="kontak">
-    <div class="container reveal reveal-delay-1">
+    <div class="container">
         <div class="contact__grid">
 
-            <div class="contact__info">
+            <!-- Info Kontak -->
+            <div class="contact__info reveal reveal-delay-1">
                 <h2>Hubungi Kami</h2>
-                <p>Punya pertanyaan teknis atau ingin menjalin kerjasama? Tim layanan pelanggan kami siap membantu Anda di jam kerja.</p>
+                <p>Punya pertanyaan atau butuh bantuan? Tim kami siap membantu Anda di jam kerja. Kunjungi kantor kami atau hubungi melalui kontak berikut.</p>
+
                 <div class="contact__items">
                     <div class="contact__item">
                         <div class="contact__item-icon"><i class="fa-solid fa-location-dot"></i></div>
@@ -410,6 +412,7 @@ $query_kategori = mysqli_query($koneksi, "
                             <p>Gedung Pelayanan Publik Lt. 2<br>Jl. Pejanggik No. 1, Mataram, NTB 83112</p>
                         </div>
                     </div>
+
                     <div class="contact__item">
                         <div class="contact__item-icon"><i class="fa-solid fa-envelope"></i></div>
                         <div>
@@ -417,32 +420,48 @@ $query_kategori = mysqli_query($koneksi, "
                             <p>bantuan@laporin-mataram.go.id</p>
                         </div>
                     </div>
+
                     <div class="contact__item">
                         <div class="contact__item-icon"><i class="fa-solid fa-phone"></i></div>
                         <div>
                             <h4>Telepon / WhatsApp</h4>
-                            <p>+62 811-3800-xxxx (Chat Only)<br>Call Center: 112</p>
+                            <p>+62 811-3800-1827 (Chat Only)<br>Call Center: 112</p>
+                        </div>
+                    </div>
+
+                    <div class="contact__item">
+                        <div class="contact__item-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div>
+                            <h4>Jam Operasional</h4>
+                            <p>Senin – Jumat: 08.00 – 16.00 WITA<br>Sabtu – Minggu: 08.00 - 12.00 WITA</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Tombol Aksi Cepat -->
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <a href="https://wa.me/628113801827" target="_blank"
+                        style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--accent); color: white; padding: 0.6rem 1.2rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;">
+                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="mailto:bantuan@laporin-mataram.go.id"
+                        style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--primary); color: white; padding: 0.6rem 1.2rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;">
+                        <i class="fa-solid fa-envelope"></i> Kirim Email
+                    </a>
+                </div>
             </div>
 
-            <div class="contact__form">
-                <form onsubmit="event.preventDefault(); alert('Pesan Anda terkirim!');">
-                    <div class="form-group">
-                        <label for="nama">Nama Lengkap</label>
-                        <input type="text" id="nama" placeholder="Nama Anda" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" placeholder="email@contoh.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="pesan">Pesan</label>
-                        <textarea id="pesan" rows="4" placeholder="Tuliskan pesan Anda di sini..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn--submit">Kirim Pesan</button>
-                </form>
+            <!-- Google Maps -->
+            <div class="contact__map reveal reveal-delay-2">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.0!2d116.1167!3d-8.5833!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dcdb5b4c1234567%3A0x1234567890abcdef!2sJl.%20Pejanggik%2C%20Mataram%2C%20Nusa%20Tenggara%20Bar.!5e0!3m2!1sid!2sid!4v1234567890"
+                    width="90%"
+                    height="90%"
+                    style="border: 0; border-radius: 16px;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
             </div>
 
         </div>

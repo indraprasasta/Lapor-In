@@ -139,10 +139,6 @@ $back_url = isset($_GET['from']) ? 'pengaduan.php?status=' . $_GET['from'] : 'be
                 </div>
             </div>
 
-            <div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Pengaturan</div>
-            <a href="#" class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary"></i> Profil Saya
-            </a>
         </nav>
 
         <div class="p-4 border-t border-slate-200">

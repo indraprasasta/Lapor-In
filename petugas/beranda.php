@@ -22,6 +22,7 @@ if (empty($kategori_list)) {
     $total_ditugaskan  = 0;
     $sedang_diproses   = 0;
     $selesai_ditangani = 0;
+    $notif_count       = 0;
 } else {
     $kategori_in = implode(',', $kategori_list);
 
@@ -43,6 +44,12 @@ if (empty($kategori_list)) {
     $selesai_ditangani = mysqli_fetch_assoc(mysqli_query($koneksi,
         "SELECT COUNT(*) as total FROM laporan
         WHERE kategori IN ($kategori_in) AND status = 'Selesai'"))['total'];
+
+    $notif_count = mysqli_fetch_assoc(mysqli_query($koneksi,
+        "SELECT COUNT(*) as total FROM laporan
+         WHERE kategori IN ($kategori_in)
+         AND status = 'Menunggu'"
+    ))['total'];
 }
 
 $petugas_nama    = $_SESSION['petugas_nama'];
@@ -265,6 +272,55 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
           <h1 class="text-lg font-bold text-dark">
             Dashboard Petugas Lapangan
           </h1>
+        </div>
+          <!-- Bell Notifikasi -->
+          <div class="ml-auto relative">
+              <button onclick="toggleNotif()" class="relative p-2 text-dark hover:text-primary rounded-full hover:bg-white/40 transition-colors">
+                  <i data-lucide="bell" class="w-5 h-5"></i>
+                  <?php if($notif_count > 0): ?>
+                  <span class="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-white text-[10px] font-bold">
+                      <?php echo $notif_count > 99 ? '99+' : $notif_count; ?>
+                  </span>
+                  <?php endif; ?>
+              </button>
+
+              <!-- Dropdown Notifikasi -->
+              <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
+                  <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                      <h4 class="font-bold text-dark text-sm">Notifikasi</h4>
+                      <?php if($notif_count > 0): ?>
+                      <span class="text-xs bg-danger/10 text-danger font-semibold px-2 py-0.5 rounded-full">
+                          <?php echo $notif_count; ?> baru
+                      </span>
+                      <?php endif; ?>
+                  </div>
+                  <div class="max-h-64 overflow-y-auto">
+                      <?php if($notif_count > 0): ?>
+                      <a href="pengaduan.php?status=Menunggu" class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                          <div class="w-9 h-9 rounded-full bg-warning/10 flex items-center justify-center shrink-0 mt-0.5">
+                              <i data-lucide="clock" class="w-4 h-4 text-warning"></i>
+                          </div>
+                          <div>
+                              <p class="text-sm font-semibold text-dark">Laporan Menunggu</p>
+                              <p class="text-xs text-muted mt-0.5">
+                                  Ada <span class="font-bold text-warning"><?php echo $notif_count; ?></span> laporan menunggu ditangani
+                              </p>
+                          </div>
+                      </a>
+                      <?php else: ?>
+                      <div class="px-4 py-8 text-center text-muted">
+                          <i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2 text-secondary"></i>
+                          <p class="text-sm font-medium">Semua laporan tertangani</p>
+                      </div>
+                      <?php endif; ?>
+                  </div>
+                  <div class="px-4 py-2 border-t border-slate-100">
+                      <a href="pengaduan.php?status=Menunggu" class="text-xs text-primary font-semibold hover:underline">
+                          Lihat semua pengaduan →
+                      </a>
+                  </div>
+              </div>
+          </div>
       </header>
 
       <!-- ===== MAIN CONTENT ===== -->
@@ -379,9 +435,9 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
                   <tbody id="taskTableBody" class="text-sm divide-y divide-slate-100">
                       <?php if($query_laporan && mysqli_num_rows($query_laporan) > 0): ?>
                           <?php while($laporan = mysqli_fetch_assoc($query_laporan)): ?>
-                          <!-- Tambah onclick ke <tr> -->
+
                           <tr class="hover:bg-slate-50 transition-colors cursor-pointer" id="row-<?php echo $laporan['id']; ?>"
-                              onclick="window.location='detailLaporan.php?id=<?php echo $laporan['id']; ?>&from=beranda'">
+                              >
                               <td class="py-4 px-4 align-top">
                                   <div class="flex items-start">
                                       <div class="w-10 h-10 rounded bg-slate-100 flex items-center justify-center mr-3 shrink-0 border border-slate-200">
@@ -864,6 +920,20 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
           btn.classList.add("text-muted");
         }
       }
+      // Toggle dropdown notifikasi
+      function toggleNotif() {
+          const dropdown = document.getElementById('notifDropdown');
+          dropdown.classList.toggle('hidden');
+      }
+
+      // Tutup dropdown jika klik di luar
+      document.addEventListener('click', function(e) {
+          const dropdown = document.getElementById('notifDropdown');
+          const btn = e.target.closest('button[onclick="toggleNotif()"]');
+          if (!btn && dropdown && !dropdown.contains(e.target)) {
+              dropdown.classList.add('hidden');
+          }
+      });
     </script>
   </body>
 </html>

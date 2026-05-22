@@ -148,24 +148,18 @@ $user    = mysqli_fetch_assoc($query);
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
 
         <!-- Top Navbar -->
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-30">
+        <header class="h-16 bg-accent border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-30">
             <button
                 class="lg:hidden text-muted hover:text-dark p-2 -ml-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 onclick="toggleSidebar()">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             <div class="hidden sm:block">
-                <nav class="flex text-sm text-muted font-medium">
+                <nav class="flex text-white text-muted font-medium">
                     <a href="beranda.html" class="hover:text-dark">Dashboard</a>
                     <span class="mx-2">/</span>
                     <span class="text-dark">Profil Pengguna</span>
                 </nav>
-            </div>
-            <div class="flex items-center ml-auto">
-                <button
-                    class="relative p-2 text-muted hover:text-dark rounded-full hover:bg-slate-50 transition-colors">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                </button>
             </div>
         </header>
 
@@ -273,28 +267,6 @@ $user    = mysqli_fetch_assoc($query);
                                         <label for="alamat" class="block text-sm font-semibold text-dark mb-2">Alamat Tempat Tinggal</label>
                                         <textarea id="alamat" name="alamat" rows="3" required
                                             class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-accent outline-none transition-colors text-sm resize-y text-dark"><?php echo $user['alamat']; ?></textarea>
-                                    </div>
-
-                                    <h3 class="text-lg font-bold text-dark border-b border-slate-100 pb-4 mt-10 mb-6">Keamanan Akun</h3>
-
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        <!-- Password Baru -->
-                                        <div>
-                                            <label for="new_password" class="block text-sm font-semibold text-dark mb-2">Kata Sandi Baru</label>
-                                            <div class="relative">
-                                                <input type="password" id="new_password" name="new_password" placeholder="Biarkan kosong jika tidak diubah"
-                                                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-accent outline-none transition-colors text-sm text-dark">
-                                            </div>
-                                        </div>
-
-                                        <!-- Konfirmasi Password -->
-                                        <div>
-                                            <label for="confirm_password" class="block text-sm font-semibold text-dark mb-2">Konfirmasi Sandi Baru</label>
-                                            <div class="relative">
-                                                <input type="password" id="confirm_password" name="confirm_password" placeholder="Ulangi kata sandi baru"
-                                                    class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-accent outline-none transition-colors text-sm text-dark">
-                                            </div>
-                                        </div>
                                     </div>
 
                                     <!-- Actions -->
