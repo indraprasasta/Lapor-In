@@ -9,7 +9,7 @@ if (!isset($_SESSION['petugas_id'])) {
 require __DIR__ . '/../database/conection.php';
 
 $id_laporan  = (int) $_POST['id_laporan'];
-$status_baru = mysqli_real_escape_string($koneksi, $_POST['status_baru']);
+$status_baru = trim($_POST['status_baru']);
 $allowed     = ['Diproses', 'Selesai', 'Ditolak'];
 
 if (!in_array($status_baru, $allowed)) {
@@ -17,11 +17,12 @@ if (!in_array($status_baru, $allowed)) {
     exit();
 }
 
-$query = mysqli_query($koneksi, "UPDATE laporan SET status = '$status_baru' WHERE id = '$id_laporan'");
+$stmt = $pdo->prepare("UPDATE laporan SET status = :status WHERE id = :id");
+$success = $stmt->execute([':status' => $status_baru, ':id' => $id_laporan]);
 
-if ($query) {
+if ($success) {
     echo json_encode(['success' => true, 'message' => 'Status berhasil diperbarui']);
 } else {
-    echo json_encode(['success' => false, 'message' => mysqli_error($koneksi)]);
+    echo json_encode(['success' => false, 'message' => 'Gagal mengupdate status']);
 }
 ?>

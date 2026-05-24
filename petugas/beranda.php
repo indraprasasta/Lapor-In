@@ -8,13 +8,11 @@ if (!isset($_SESSION['petugas_id'])) {
 }
 // Ambil kategori yang menjadi tanggung jawab dinas petugas
 $dinas_id = $_SESSION['petugas_dinas_id'];
-$query_kategori = mysqli_query($koneksi,
-    "SELECT kategori FROM dinas_kategori WHERE dinas_id = '$dinas_id'"
-);
+$query_kategori = $pdo->query("SELECT kategori FROM dinas_kategori WHERE dinas_id = '$dinas_id'");
 
 $kategori_list = [];
-while($row = mysqli_fetch_assoc($query_kategori)) {
-    $kategori_list[] = "'" . mysqli_real_escape_string($koneksi, $row['kategori']) . "'";
+while($row = $query_kategori->fetch()) {
+    $kategori_list[] = "'" . trim($row['kategori']) . "'";
 }
 //validasi
 if (empty($kategori_list)) {
@@ -26,30 +24,30 @@ if (empty($kategori_list)) {
 } else {
     $kategori_in = implode(',', $kategori_list);
 
-    $query_laporan = mysqli_query($koneksi,
+    $query_laporan = $pdo->query(
         "SELECT * FROM laporan
         WHERE kategori IN ($kategori_in)
         AND status IN ('Menunggu', 'Diproses')
         ORDER BY tanggal DESC"
     );
 
-    $total_ditugaskan = mysqli_fetch_assoc(mysqli_query($koneksi,
+    $total_ditugaskan = $pdo->query(
         "SELECT COUNT(*) as total FROM laporan
-        WHERE kategori IN ($kategori_in)"))['total'];
+        WHERE kategori IN ($kategori_in)")->fetch()['total'];
 
-    $sedang_diproses = mysqli_fetch_assoc(mysqli_query($koneksi,
+    $sedang_diproses = $pdo->query(
         "SELECT COUNT(*) as total FROM laporan
-        WHERE kategori IN ($kategori_in) AND status = 'Diproses'"))['total'];
+        WHERE kategori IN ($kategori_in) AND status = 'Diproses'")->fetch()['total'];
 
-    $selesai_ditangani = mysqli_fetch_assoc(mysqli_query($koneksi,
+    $selesai_ditangani = $pdo->query(
         "SELECT COUNT(*) as total FROM laporan
-        WHERE kategori IN ($kategori_in) AND status = 'Selesai'"))['total'];
+        WHERE kategori IN ($kategori_in) AND status = 'Selesai'")->fetch()['total'];
 
-    $notif_count = mysqli_fetch_assoc(mysqli_query($koneksi,
+    $notif_count = $pdo->query(
         "SELECT COUNT(*) as total FROM laporan
          WHERE kategori IN ($kategori_in)
          AND status = 'Menunggu'"
-    ))['total'];
+    )->fetch()['total'];
 }
 
 $petugas_nama    = $_SESSION['petugas_nama'];
@@ -433,8 +431,8 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
                     </tr>
                   </thead>
                   <tbody id="taskTableBody" class="text-sm divide-y divide-slate-100">
-                      <?php if($query_laporan && mysqli_num_rows($query_laporan) > 0): ?>
-                          <?php while($laporan = mysqli_fetch_assoc($query_laporan)): ?>
+                      <?php if($query_laporan && $query_laporan->rowCount() > 0): ?>
+                          <?php while($laporan = $query_laporan->fetch()): ?>
 
                           <tr class="hover:bg-slate-50 transition-colors cursor-pointer" id="row-<?php echo $laporan['id']; ?>"
                               >
@@ -502,14 +500,14 @@ $petugas_dinas   = $_SESSION['petugas_dinas'];
               $kategori_in = implode(',', $kategori_list);
               // query ulang untuk mobile (pointer sudah habis)
               if (!empty($kategori_list)) {
-                  $q_mobile = mysqli_query($koneksi,
+                  $q_mobile = $pdo->query(
                       "SELECT * FROM laporan
                       WHERE kategori IN ($kategori_in)
                       AND status IN ('Menunggu', 'Diproses')
                       ORDER BY tanggal DESC"
                   );
-                  if ($q_mobile && mysqli_num_rows($q_mobile) > 0):
-                      while ($lap = mysqli_fetch_assoc($q_mobile)):
+                  if ($q_mobile && $q_mobile->rowCount() > 0):
+                      while ($lap = $q_mobile->fetch()):
                           $border_color = $lap['status'] === 'Menunggu' ? 'border-warning' : 'border-info';
                           $badge_class  = $lap['status'] === 'Menunggu'
                               ? 'bg-warning/10 text-warning border-warning/20'

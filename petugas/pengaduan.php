@@ -13,12 +13,10 @@ $petugas_jabatan = $_SESSION['petugas_jabatan'];
 $petugas_dinas = $_SESSION['petugas_dinas'];
  
 // Ambil kategori dinas petugas
-$query_kategori = mysqli_query($koneksi,
-    "SELECT kategori FROM dinas_kategori WHERE dinas_id = '$dinas_id'"
-);
+$query_kategori = $pdo->query("SELECT kategori FROM dinas_kategori WHERE dinas_id = '$dinas_id'");
 $kategori_list = [];
-while ($row = mysqli_fetch_assoc($query_kategori)) {
-    $kategori_list[] = "'" . mysqli_real_escape_string($koneksi, $row['kategori']) . "'";
+while ($row = $query_kategori->fetch()) {
+    $kategori_list[] = "'" . trim($row['kategori']) . "'";
 }
  
 // Status yang valid
@@ -41,15 +39,15 @@ if (empty($kategori_list)) {
     $total_status  = 0;
 } else {
     $kategori_in   = implode(',', $kategori_list);
-    $status_escape = mysqli_real_escape_string($koneksi, $status_aktif);
  
-    $query_laporan = mysqli_query($koneksi,
+    $query_laporan = $pdo->prepare(
         "SELECT * FROM laporan
          WHERE kategori IN ($kategori_in)
-         AND status = '$status_escape'
+         AND status = :status
          ORDER BY tanggal DESC"
     );
-    $total_status = mysqli_num_rows($query_laporan);
+    $query_laporan->execute([':status' => $status_aktif]);
+    $total_status = $query_laporan->rowCount();
 }
  
 $cfg = $status_cfg[$status_aktif];
@@ -240,8 +238,8 @@ $cfg = $status_cfg[$status_aktif];
                             </tr>
                         </thead>
                         <tbody id="taskTableBody" class="text-sm divide-y divide-slate-100">
-                            <?php if ($query_laporan && mysqli_num_rows($query_laporan) > 0): ?>
-                                <?php while ($lap = mysqli_fetch_assoc($query_laporan)): ?>
+                            <?php if ($query_laporan && $query_laporan->rowCount() > 0): ?>
+                                <?php while ($lap = $query_laporan->fetch()): ?>
                                 <tr class="hover:bg-slate-50 transition-colors cursor-pointer" id="row-<?php echo $lap['id']; ?>"
                                 onclick="window.location='detailLaporan.php?id=<?php echo $lap['id']; ?>&from=<?php echo $status_aktif; ?>'">
                                     <td class="py-4 px-4 align-top">
@@ -311,14 +309,15 @@ $cfg = $status_cfg[$status_aktif];
                     $status_escape  = '';
                     // query ulang untuk mobile
                     if (!empty($kategori_list)) {
-                        $q_mobile = mysqli_query($koneksi,
+                        $q_mobile = $pdo->prepare(
                             "SELECT * FROM laporan
                             WHERE kategori IN ($kategori_in)
-                            AND status = '$status_escape'
+                            AND status = :status
                             ORDER BY tanggal DESC"
                         );
-                        if (mysqli_num_rows($q_mobile) > 0):
-                            while ($lap = mysqli_fetch_assoc($q_mobile)):
+                        $q_mobile->execute([':status' => $status_aktif]);
+                        if ($q_mobile->rowCount() > 0):
+                            while ($lap = $q_mobile->fetch()):
                     ?>
                     <div class="p-4 bg-white border-l-4 <?php echo $cfg['border_l']; ?>">
                         <div class="flex justify-between items-start mb-2">

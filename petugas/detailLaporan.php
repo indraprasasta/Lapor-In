@@ -20,25 +20,24 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $id_laporan = (int) $_GET['id'];
 
 // Ambil data laporan dengan info pelapor
-$query_laporan = mysqli_query($koneksi, "
+$stmt_laporan = $pdo->prepare("
     SELECT laporan.*, users.nama as nama_pelapor
     FROM laporan
     JOIN users ON laporan.user_id = users.id
-    WHERE laporan.id = '$id_laporan'
+    WHERE laporan.id = :id
 ");
+$stmt_laporan->execute([':id' => $id_laporan]);
 
-if (mysqli_num_rows($query_laporan) == 0) {
+if ($stmt_laporan->rowCount() == 0) {
     header("Location: beranda.php");
     exit();
 }
-$laporan = mysqli_fetch_assoc($query_laporan);
+$laporan = $stmt_laporan->fetch();
 
 // Ambil kategori dinas petugas — pastikan laporan ini memang milik dinas petugas
-$query_kategori = mysqli_query($koneksi,
-    "SELECT kategori FROM dinas_kategori WHERE dinas_id = '$dinas_id'"
-);
+$query_kategori = $pdo->query("SELECT kategori FROM dinas_kategori WHERE dinas_id = '$dinas_id'");
 $kategori_list = [];
-while ($row = mysqli_fetch_assoc($query_kategori)) {
+while ($row = $query_kategori->fetch()) {
     $kategori_list[] = $row['kategori'];
 }
 
