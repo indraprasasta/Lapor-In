@@ -1,1 +1,451 @@
+<?php
+session_start();
 
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+$admin_nama = $_SESSION['admin_nama'];
+
+require __DIR__ . '/../database/conection.php';
+
+$total      = $pdo->query("SELECT COUNT(*) as total FROM laporan")->fetch()['total'];
+$hari_ini   = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE DATE(tanggal) = CURDATE()")->fetch()['total'];
+$menunggu   = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE status = 'Menunggu'")->fetch()['total'];
+$diproses   = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE status = 'Diproses'")->fetch()['total'];
+$selesai    = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE status = 'Selesai'")->fetch()['total'];
+$ditolak    = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE status = 'Ditolak'")->fetch()['total'];
+
+// Ambil empat terbaru
+$query_terbaru_stmt = $pdo->query("
+    SELECT laporan.*, users.nama as nama_pelapor 
+    FROM laporan 
+    JOIN users ON laporan.user_id = users.id 
+    ORDER BY laporan.tanggal DESC 
+    LIMIT 4
+");
+$query_terbaru = $query_terbaru_stmt->fetchAll();
+
+// Data chart kecamatan
+$query_kecamatan = $pdo->query("
+    SELECT kecamatan, COUNT(*) as total 
+    FROM laporan 
+    GROUP BY kecamatan 
+    ORDER BY total DESC
+");
+$kecamatan_labels = [];
+$kecamatan_data   = [];
+while($row = $query_kecamatan->fetch()) {
+    $kecamatan_labels[] = $row['kecamatan'];
+    $kecamatan_data[]   = $row['total'];
+}
+
+// Notifikasi: laporan menunggu validasi
+$notif_count = $pdo->query(
+    "SELECT COUNT(*) as total FROM laporan WHERE status = 'Menunggu'"
+)->fetch()['total'];
+?>
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beranda Admin - LaporIn Mataram</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Tailwind Config to match LaporIn Design System -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Poppins", "sans-serif"],
+            },
+            colors: {
+              primary: {
+                DEFAULT: "#3A5A40", // Dark Green
+                dark: "#2B4330", // Darker Green for hover
+              },
+              accent: {
+                DEFAULT: "#A3B18A", // Light Green
+                dark: "#8b9a70",
+              },
+              secondary: "#588157", // Medium Green
+              warning: "#D97706", // Amber
+              danger: "#DC2626", // Red
+              info: "#0284C7", // Blue
+              dark: "#1E293B", // Slate 800
+              light: "#F8FAFC", // Slate 50
+              muted: "#94A3B8", // Slate 400
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f8fafc;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #a3b18a;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #3a5a40;
+      }
+    </style>
+  </head>
+
+  <body class="bg-light text-dark font-sans h-screen flex overflow-hidden">
+    <!-- Mobile Sidebar Overlay -->
+    <div
+      id="sidebarOverlay"
+      class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden"
+      onclick="toggleSidebar()"
+    ></div>
+
+    <!-- Sidebar Admin -->
+    <?php include 'sidebar.php'; ?>
+
+    <!-- Main Wrapper -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <!-- Top Navbar -->
+      <header
+        class="h-16 bg-accent border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 z-30 shrink-0 shadow-sm"
+      >
+        <button
+          class="lg:hidden text-dark hover:text-primary p-2 -ml-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          onclick="toggleSidebar()"
+        >
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+        <div class="hidden sm:block">
+          <h1 class="text-lg font-bold text-dark">
+            Ringkasan Sistem Pelaporan
+          </h1>
+          </div>
+          <div class="ml-auto relative">
+          <button onclick="toggleNotif()" class="relative p-2 text-dark hover:text-primary rounded-full hover:bg-white/40 transition-colors">
+              <i data-lucide="bell" class="w-5 h-5"></i>
+              <?php if($notif_count > 0): ?>
+              <span class="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-white text-[10px] font-bold">
+                  <?php echo $notif_count > 99 ? '99+' : $notif_count; ?>
+              </span>
+              <?php endif; ?>
+          </button>
+
+          <!-- Dropdown Notifikasi -->
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 z-50">
+              <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <h4 class="font-bold text-dark text-sm">Notifikasi</h4>
+                  <?php if($notif_count > 0): ?>
+                  <span class="text-xs bg-danger/10 text-danger font-semibold px-2 py-0.5 rounded-full">
+                      <?php echo $notif_count; ?> menunggu
+                  </span>
+                  <?php endif; ?>
+              </div>
+              <div class="max-h-64 overflow-y-auto">
+                  <?php if($notif_count > 0): ?>
+                  <a href="dataLaporan.php?status=Menunggu" class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                      <div class="w-9 h-9 rounded-full bg-warning/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <i data-lucide="clock" class="w-4 h-4 text-warning"></i>
+                      </div>
+                      <div>
+                          <p class="text-sm font-semibold text-dark">Laporan Menunggu Validasi</p>
+                          <p class="text-xs text-muted mt-0.5">
+                              <span class="font-bold text-warning"><?php echo $notif_count; ?></span> laporan belum diproses
+                          </p>
+                      </div>
+                  </a>
+                  <?php else: ?>
+                  <div class="px-4 py-8 text-center text-muted">
+                      <i data-lucide="check-circle" class="w-8 h-8 mx-auto mb-2 text-secondary"></i>
+                      <p class="text-sm font-medium">Tidak ada notifikasi baru</p>
+                  </div>
+                  <?php endif; ?>
+              </div>
+              <div class="px-4 py-2 border-t border-slate-100">
+                  <a href="dataLaporan.php" class="text-xs text-primary font-semibold hover:underline">
+                      Lihat semua laporan →
+                  </a>
+              </div>
+          </div>
+      </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto bg-light p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto space-y-6">
+          <!-- Welcome Section -->
+          <div>
+            <h2 class="text-2xl font-bold text-dark tracking-tight">
+              Dashboard Utama
+            </h2>
+            <p class="text-muted mt-1 text-sm">
+              Pantau statistik dan rekapitulasi data infrastruktur Kota Mataram.
+            </p>
+          </div>
+
+          <!-- 6 Stats Cards Grid -->
+          <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <!-- Total Laporan -->
+            <div
+              class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-2xl font-bold text-dark"><?php echo $total; ?></p>
+                
+                <i data-lucide="layers" class="w-4 h-4 text-primary"></i>
+              </div>
+              <p class="text-xs text-muted font-medium mt-1">
+                Total Laporan
+              </p>
+            </div>
+
+            <!-- Hari Ini -->
+            <div
+              class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-2xl font-bold text-dark"><?php echo $hari_ini; ?></p>
+                <i data-lucide="calendar-plus" class="w-4 h-4 text-primary"></i>
+              </div>
+              <p class="text-xs text-muted font-medium mt-1">
+                Laporan masuk hari ini
+              </p>
+            </div>
+
+            <!-- Menunggu -->
+            <div
+              class="bg-white p-4 rounded-xl border border-warning/30 shadow-sm bg-warning/5"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-2xl font-bold text-warning"><?php echo $menunggu; ?></p>
+                <i data-lucide="clock" class="w-4 h-4 text-warning"></i>
+              </div>
+              <p class="text-xs text-warning/80 font-medium mt-1">
+                Menunggu validasi
+              </p>
+            </div>
+
+            <!-- Diproses -->
+            <div
+              class="bg-white p-4 rounded-xl border border-info/30 shadow-sm bg-info/5"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-2xl font-bold text-info"><?php echo $diproses; ?></p>
+                <i
+                  data-lucide="settings"
+                  class="w-4 h-4 text-info animate-[spin_3s_linear_infinite]"
+                ></i>
+              </div>
+              <p class="text-xs text-info/80 font-medium mt-1">
+                Sedang ditangani
+              </p>
+            </div>
+
+            <!-- Selesai -->
+            <div
+              class="bg-white p-4 rounded-xl border border-secondary/30 shadow-sm bg-secondary/5"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-2xl font-bold text-secondary"><?php echo $selesai; ?></p>
+                <i
+                  data-lucide="check-circle"
+                  class="w-4 h-4 text-secondary"
+                ></i>
+              </div>
+              <p class="text-xs text-secondary/80 font-medium mt-1">
+                Telah diselesaikan
+              </p>
+            </div>
+
+            <!-- Ditolak -->
+            <div
+              class="bg-white p-4 rounded-xl border border-danger/30 shadow-sm bg-danger/5"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-2xl font-bold text-danger"><?php echo $ditolak; ?></p>
+                <i data-lucide="x-circle" class="w-4 h-4 text-danger"></i>
+              </div>
+              <p class="text-xs text-danger/80 font-medium mt-1">
+                Tidak valid
+              </p>
+            </div>
+          </div>
+
+          <!-- Bottom Section: Kecamatan & Recent Table -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Bar Chart: Laporan per Kecamatan (Span 1) -->
+            <div
+              class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm"
+            >
+              <div class="flex justify-between items-center mb-4">
+                <div>
+                  <h3 class="font-bold text-dark">Distribusi Wilayah</h3>
+                  <p class="text-xs text-muted">Jumlah laporan per Kecamatan</p>
+                </div>
+              </div>
+              <div class="relative h-[300px] w-full">
+                <canvas id="kecamatanChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Recent Reports Table (Span 2) -->
+            <div
+              class="bg-white border border-slate-200 rounded-xl shadow-sm lg:col-span-2 flex flex-col"
+            >
+              <div
+                class="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 rounded-t-xl"
+              >
+                <h3 class="font-bold text-dark">
+                  Laporan Terbaru Membutuhkan Tindakan
+                </h3>
+                <a
+                  href="dataLaporan.php"
+                  class="text-sm font-semibold text-primary hover:text-primary-dark"
+                  >Lihat Semua Data</a
+                >
+              </div>
+              <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr
+                      class="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wider bg-white"
+                    >
+                      <th class="py-3 px-5 font-semibold">ID Laporan</th>
+                      <th class="py-3 px-5 font-semibold">
+                        Kategori & Kerusakan
+                      </th>
+                      <th class="py-3 px-5 font-semibold">Pelapor</th>
+                      <th class="py-3 px-5 font-semibold">Status</th>
+                      <th class="py-3 px-5 text-right font-semibold">Aksi</th>
+                    </tr>
+                  </thead>
+                 <tbody class="text-sm divide-y divide-slate-100 bg-white">
+                      <?php if(count($query_terbaru) > 0): ?>
+                          <?php foreach($query_terbaru as $laporan): ?>
+                          <tr class="hover:bg-slate-50 transition-colors">
+                              <td class="py-3 px-5 font-mono text-xs text-slate-500">
+                                  #<?php echo str_pad($laporan['id'], 4, '0', STR_PAD_LEFT); ?>
+                              </td>
+                              <td class="py-3 px-5">
+                                  <p class="font-bold text-dark mb-0.5 line-clamp-1"><?php echo $laporan['judul']; ?></p>
+                                  <p class="text-xs text-muted"><?php echo $laporan['kategori']; ?></p>
+                              </td>
+                              <td class="py-3 px-5 text-muted"><?php echo $laporan['nama_pelapor']; ?></td>
+                              <td class="py-3 px-5">
+                                  <?php
+                                  $status = $laporan['status'];
+                                  if($status == 'Menunggu') {
+                                      echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning border border-warning/20">MENUNGGU</span>';
+                                  } elseif($status == 'Diproses') {
+                                      echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-info/10 text-info border border-info/20">DIPROSES</span>';
+                                  } elseif($status == 'Selesai') {
+                                      echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">SELESAI</span>';
+                                  } elseif($status == 'Ditolak') {
+                                      echo '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-danger/10 text-danger border border-danger/20">DITOLAK</span>';
+                                  }
+                                  ?>
+                              </td>
+                              <td class="py-3 px-5 text-right">
+                                  <a href="detailLaporan.php?id=<?php echo $laporan['id']; ?>"
+                                      class="border border-slate-300 text-slate-600 text-xs px-3 py-1.5 rounded font-semibold hover:bg-slate-50 shadow-sm">
+                                      Detail
+                                  </a>
+                              </td>
+                          </tr>
+                          <?php endforeach; ?>
+                      <?php else: ?>
+                          <tr>
+                              <td colspan="5" class="py-8 text-center text-muted">Belum ada laporan</td>
+                          </tr>
+                      <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+      // Initialize Lucide Icons
+      lucide.createIcons();
+
+      // Sidebar Toggle Logic for Mobile
+      
+
+      // --- Chart.js Configurations ---
+
+      // Global Chart Styling
+      Chart.defaults.font.family = "'Poppins', sans-serif";
+      Chart.defaults.color = "#94A3B8"; // text-slate-400
+      Chart.defaults.scale.grid.color = "#F1F5F9"; // slate-100
+
+      const kecamatanLabels = <?php echo json_encode($kecamatan_labels); ?>;
+      const kecamatanData   = <?php echo json_encode($kecamatan_data); ?>;
+
+      const ctxKec = document.getElementById("kecamatanChart").getContext("2d");
+      new Chart(ctxKec, {
+          type: "bar",
+          data: {
+              labels: kecamatanLabels,
+              datasets: [{
+                  label: "Jumlah Laporan",
+                  data: kecamatanData,
+                  backgroundColor: "#3A5A40",
+                  borderRadius: 4,
+              }],
+          },
+          options: {
+              indexAxis: "y",
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                  x: { beginAtZero: true, grid: { drawBorder: false } },
+                  y: { grid: { display: false, drawBorder: false } },
+              },
+          },
+      });
+      
+    // Toggle dropdown notifikasi
+    function toggleNotif() {
+        const dropdown = document.getElementById('notifDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Tutup dropdown jika klik di luar
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('notifDropdown');
+        const btn = e.target.closest('button[onclick="toggleNotif()"]');
+        if (!btn && dropdown && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+    </script>
+  </body>
+</html>
