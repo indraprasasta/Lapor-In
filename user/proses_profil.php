@@ -9,8 +9,8 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $id_user = $_SESSION['user_id'];
-$nama    = mysqli_real_escape_string($koneksi, $_POST['nama']);
-$alamat  = mysqli_real_escape_string($koneksi, $_POST['alamat']);
+$nama    = trim($_POST['nama']);
+$alamat  = trim($_POST['alamat']);
 
 //pengecekan folder jika belum ada 
 if (!is_dir($folder)) {
@@ -18,15 +18,16 @@ if (!is_dir($folder)) {
 }
 
 // Ambil foto lama dari database dulu
-$query_lama = mysqli_query($koneksi, "SELECT foto FROM users WHERE id = '$id_user'");
-$data_lama  = mysqli_fetch_assoc($query_lama);
+$stmt_lama = $pdo->prepare("SELECT foto FROM users WHERE id = :id");
+$stmt_lama->execute([':id' => $id_user]);
+$data_lama = $stmt_lama->fetch();
 $foto_lama  = $data_lama['foto']; // simpan foto lama
 
 // Proses upload foto
-$foto_query = ""; // kosong jika tidak ada foto baru
+$nama_file = $foto_lama;
 
 if (!empty($_FILES['foto']['name'])) {
-    $nama_file   = time() . '_' . $_FILES['foto']['name'];
+    $nama_file_baru = time() . '_' . $_FILES['foto']['name'];
     $folder      = __DIR__ . '/../uploads/foto_profil/';
     $tipe_file   = $_FILES['foto']['type'];
     $ukuran_file = $_FILES['foto']['size'];
@@ -43,23 +44,21 @@ if (!empty($_FILES['foto']['name'])) {
         exit();
     }
 
-    if (move_uploaded_file($_FILES['foto']['tmp_name'], $folder . $nama_file)) {
-        $foto_query = ", foto = '$nama_file'";
+    if (move_uploaded_file($_FILES['foto']['tmp_name'], $folder . $nama_file_baru)) {
+        $nama_file = $nama_file_baru;
         
         // Hapus foto lama jika ada
         if (!empty($foto_lama) && file_exists($folder . $foto_lama)) {
             unlink($folder . $foto_lama);
         }
     }
-} else {
-    // Jika tidak ada foto baru, pakai foto lama
-    $foto_query = ", foto = '$foto_lama'";
 }
 
 // Update data user
-$query = "UPDATE users SET nama = '$nama', alamat = '$alamat' $foto_query WHERE id = '$id_user'";
+$stmt = $pdo->prepare("UPDATE users SET nama = :nama, alamat = :alamat, foto = :foto WHERE id = :id");
+$success = $stmt->execute([':nama' => $nama, ':alamat' => $alamat, ':foto' => $nama_file, ':id' => $id_user]);
 
-if (mysqli_query($koneksi, $query)) {
+if ($success) {
     $_SESSION['nama'] = $nama;
     echo "<script>alert('Profil berhasil diperbarui!'); window.location.href = 'profile.php';</script>";
 } else {

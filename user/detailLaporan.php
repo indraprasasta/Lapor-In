@@ -10,8 +10,9 @@ require __DIR__ . '/../database/conection.php';
 
 $user_id = $_SESSION['user_id'];
 
-$query_user = mysqli_query($koneksi, "SELECT * FROM users WHERE id = '$user_id'");
-$user       = mysqli_fetch_assoc($query_user);
+$stmt_user = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+$stmt_user->execute([':id' => $user_id]);
+$user = $stmt_user->fetch();
 
 // Ambil ID laporan dari URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {
@@ -21,13 +22,14 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $id_laporan = $_GET['id'];
 
 // Ambil data laporan - pastikan milik user yang login
-$query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE id = '$id_laporan' AND user_id = '$user_id'");
+$stmt_laporan = $pdo->prepare("SELECT * FROM laporan WHERE id = :id_laporan AND user_id = :user_id");
+$stmt_laporan->execute([':id_laporan' => $id_laporan, ':user_id' => $user_id]);
 
-if (mysqli_num_rows($query_laporan) == 0) {
+if ($stmt_laporan->rowCount() == 0) {
     header("Location: daftarLaporan.php");
     exit();
 }
-$laporan = mysqli_fetch_assoc($query_laporan);
+$laporan = $stmt_laporan->fetch();
 
 // Proses hapus laporan
 if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
@@ -40,9 +42,30 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
     }
     
     // Hapus dari database
-    mysqli_query($koneksi, "DELETE FROM laporan WHERE id = '$id_laporan' AND user_id = '$user_id'");   
+    $stmt_hapus = $pdo->prepare("DELETE FROM laporan WHERE id = :id_laporan AND user_id = :user_id");
+    $stmt_hapus->execute([':id_laporan' => $id_laporan, ':user_id' => $user_id]);
     header("Location: daftarLaporan.php?hapus=success");
     exit();
+}
+
+// Proses submit rating dan ulasan
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
+    if ($laporan['status'] == 'Selesai' && empty($laporan['rating'])) {
+        $rating = (int) $_POST['rating'];
+        $ulasan = $_POST['ulasan'];
+        if ($rating >= 1 && $rating <= 5) {
+            $stmt_ulasan = $pdo->prepare("UPDATE laporan SET rating = :rating, ulasan = :ulasan WHERE id = :id AND user_id = :user_id");
+            $stmt_ulasan->execute([
+                ':rating' => $rating,
+                ':ulasan' => $ulasan,
+                ':id' => $id_laporan,
+                ':user_id' => $user_id
+            ]);
+            // Refresh halaman untuk melihat ulasan baru
+            header("Location: detailLaporan.php?id=" . $id_laporan);
+            exit();
+        }
+    }
 }
 ?>
 
@@ -135,59 +158,7 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
     <div id="sidebarOverlay" class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar"
-        class="fixed inset-y-0 left-0 bg-white w-64 border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
-        <!-- Logo -->
-        <div class="h-16 flex items-center px-6 border-b border-slate-200">
-            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white mr-3">
-                <i data-lucide="leaf" class="w-5 h-5"></i>
-            </div>
-            <span class="text-primary font-extrabold text-2xl tracking-tight">Lapor<span class="text-accent">In</span></span>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="beranda.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Beranda
-            </a>
-            <a href="buatLaporan.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="plus-circle" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Buat Laporan
-            </a>
-            <a href="daftarLaporan.php" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
-                <i data-lucide="file-text" class="w-5 h-5 mr-3"></i>
-                Laporan Saya
-            </a>
-            <a href="profile.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Profil
-            </a>
-        </nav>
-
-        <!-- User Info -->
-        <div class="p-4 border-t border-slate-200">
-            <a href="profile.php" class="flex items-center group">
-                <div
-                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
-                    <img src="https://ui-avatars.com/api/?name=Pak+Andi&background=A3B18A&color=ffffff" alt="Avatar"
-                        class="w-full h-full object-cover">
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-semibold text-dark"><?php echo $user['nama']; ?></p>
-                    <p class="text-xs text-muted">Masyarakat</p>
-                </div>
-            </a>
-            <a href="logout.php"
-                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
-                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
-                Keluar
-            </a>
-        </div>
-    </aside>
+    <?php include 'sidebar.php'; ?>
 
     <!-- Main Wrapper -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
@@ -254,7 +225,7 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
                     </div>
 
                     <!-- Tombol Edit/Hapus -->
-                    <?php if($laporan['status'] == 'Menunggu' || $laporan['status'] == 'Selesai'): ?>
+                    <?php if($laporan['status'] == 'Menunggu'): ?>
                     <div class="flex items-center gap-2">
                         <a href="editLaporan.php?id=<?php echo $laporan['id']; ?>"
                             class="px-4 py-2 bg-white border border-slate-300 text-dark font-medium rounded-lg hover:bg-slate-50 transition-colors flex items-center text-sm shadow-sm">
@@ -311,8 +282,7 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
                                 class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                                 <h3 class="font-bold text-dark">Foto Bukti Kerusakan</h3>
                                 <span
-                                    class="text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded border border-slate-200">2
-                                    Foto</span>
+                                    class="text-xs font-medium text-slate-500 bg-white px-2 py-1 rounded border border-slate-200"><?php echo (!empty($laporan['foto'])) ? '1 Foto' : '0 Foto'; ?></span>
                             </div>
                             <div class="p-6">
                                 <div class="grid grid-cols-2 gap-4">
@@ -328,6 +298,52 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
                                 </div>
                             </div>
                         </div>
+
+                        <?php if($laporan['status'] == 'Selesai'): ?>
+                        <!-- Card Rating dan Ulasan -->
+                        <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden mt-6">
+                            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                                <h3 class="font-bold text-dark">Rating & Ulasan</h3>
+                            </div>
+                            <div class="p-6">
+                                <?php if(empty($laporan['rating'])): ?>
+                                <form method="POST" action="">
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-dark mb-2">Beri Rating (1-5)</label>
+                                        <div class="flex gap-1" id="star-rating-container">
+                                            <?php for($i=1; $i<=5; $i++): ?>
+                                            <label class="cursor-pointer star-label" data-index="<?php echo $i; ?>">
+                                                <input type="radio" name="rating" value="<?php echo $i; ?>" class="hidden rating-radio" required>
+                                                <div class="p-2 transition-colors star-box text-slate-300">
+                                                    <i data-lucide="star" class="w-8 h-8 star-icon stroke-current"></i>
+                                                </div>
+                                            </label>
+                                            <?php endfor; ?>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-dark mb-2">Ulasan</label>
+                                        <textarea name="ulasan" rows="3" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all resize-none" placeholder="Tuliskan ulasan Anda mengenai penanganan laporan ini..." required></textarea>
+                                    </div>
+                                    <button type="submit" name="submit_ulasan" class="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark transition-colors text-sm shadow-sm">
+                                        Kirim Ulasan
+                                    </button>
+                                </form>
+                                <?php else: ?>
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-1">
+                                        <?php for($i=1; $i<=5; $i++): ?>
+                                        <i data-lucide="star" class="w-5 h-5 <?php echo ($i <= $laporan['rating']) ? 'text-warning fill-warning' : 'text-slate-300'; ?>"></i>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <p class="text-dark text-sm bg-slate-50 p-4 rounded-lg border border-slate-100">
+                                        <?php echo htmlspecialchars($laporan['ulasan']); ?>
+                                    </p>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
 
                     </div>
                 </div>
@@ -364,32 +380,57 @@ if (isset($_GET['hapus']) && $_GET['hapus'] == 'true') {
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Sidebar Toggle Logic for Mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
+        function bukaModalHapus() {
+            document.getElementById('modalHapus').classList.remove('hidden');
         }
 
-    function bukaModalHapus() {
-    document.getElementById('modalHapus').classList.remove('hidden');
-    }
+        function tutupModalHapus() {
+            document.getElementById('modalHapus').classList.add('hidden');
+        }
 
-    function tutupModalHapus() {
-        document.getElementById('modalHapus').classList.add('hidden');
-    }
+        function hapusLaporan() {
+            window.location.href = 'detailLaporan.php?id=<?php echo $laporan['id']; ?>&hapus=true';
+        }
 
-    function hapusLaporan() {
-        window.location.href = 'detailLaporan.php?id=<?php echo $laporan['id']; ?>&hapus=true';
-    }
+        // Logic for Star Rating Hover & Select
+        const starLabels = document.querySelectorAll('.star-label');
+        const radios = document.querySelectorAll('.rating-radio');
+
+        function updateStars(rating) {
+            starLabels.forEach((label) => {
+                const index = parseInt(label.getAttribute('data-index'));
+                const box = label.querySelector('.star-box');
+                const svg = box.querySelector('svg') || box.querySelector('.star-icon');
+                if (index <= rating) {
+                    box.classList.remove('text-slate-300');
+                    box.classList.add('text-warning');
+                    if (svg) svg.classList.add('fill-current');
+                } else {
+                    box.classList.remove('text-warning');
+                    box.classList.add('text-slate-300');
+                    if (svg) svg.classList.remove('fill-current');
+                }
+            });
+        }
+
+        starLabels.forEach((label) => {
+            label.addEventListener('mouseenter', () => {
+                const hoverIndex = parseInt(label.getAttribute('data-index'));
+                updateStars(hoverIndex);
+            });
+
+            label.addEventListener('mouseleave', () => {
+                const selectedRadio = document.querySelector('.rating-radio:checked');
+                const rating = selectedRadio ? parseInt(selectedRadio.value) : 0;
+                updateStars(rating);
+            });
+        });
+
+        radios.forEach((radio) => {
+            radio.addEventListener('change', () => {
+                updateStars(parseInt(radio.value));
+            });
+        });
     </script>
 </body>
 

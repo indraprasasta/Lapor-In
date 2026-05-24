@@ -19,14 +19,15 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $id_laporan = $_GET['id'];
 
 // Ambil data laporan
-$query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE id = '$id_laporan' AND user_id = '$user_id'");
+$stmt_laporan = $pdo->prepare("SELECT * FROM laporan WHERE id = :id AND user_id = :user_id");
+$stmt_laporan->execute([':id' => $id_laporan, ':user_id' => $user_id]);
 
-if (mysqli_num_rows($query_laporan) == 0) {
+if ($stmt_laporan->rowCount() == 0) {
     header("Location: daftarLaporan.php");
     exit();
 }
 
-$laporan = mysqli_fetch_assoc($query_laporan);
+$laporan = $stmt_laporan->fetch();
 
 // Hanya bisa edit jika status Menunggu
 if ($laporan['status'] != 'Menunggu') {
@@ -38,12 +39,12 @@ $pesan_error = "";
 
 // Proses update
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $judul     = mysqli_real_escape_string($koneksi, $_POST['judul']);
-    $kategori  = mysqli_real_escape_string($koneksi, $_POST['kategori']);
-    $deskripsi = mysqli_real_escape_string($koneksi, $_POST['deskripsi']);
-    $alamat    = mysqli_real_escape_string($koneksi, $_POST['alamat']);
-    $kecamatan = mysqli_real_escape_string($koneksi, $_POST['kecamatan']);
-    $kelurahan = mysqli_real_escape_string($koneksi, $_POST['kelurahan']);
+    $judul     = trim($_POST['judul']);
+    $kategori  = trim($_POST['kategori']);
+    $deskripsi = trim($_POST['deskripsi']);
+    $alamat    = trim($_POST['alamat']);
+    $kecamatan = trim($_POST['kecamatan']);
+    $kelurahan = trim($_POST['kelurahan']);
 
     // Proses upload foto baru jika ada
     $foto_query = "";
@@ -70,9 +71,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if ($pesan_error == "") {
-        $query = "UPDATE laporan SET judul='$judul', kategori='$kategori', deskripsi='$deskripsi', alamat='$alamat', kecamatan='$kecamatan', kelurahan='$kelurahan' $foto_query WHERE id='$id_laporan' AND user_id='$user_id'";
+        if (!empty($foto_query)) {
+            $stmt = $pdo->prepare("UPDATE laporan SET judul=:judul, kategori=:kategori, deskripsi=:deskripsi, alamat=:alamat, kecamatan=:kecamatan, kelurahan=:kelurahan, foto=:foto WHERE id=:id AND user_id=:user_id");
+            $params = [':judul'=>$judul, ':kategori'=>$kategori, ':deskripsi'=>$deskripsi, ':alamat'=>$alamat, ':kecamatan'=>$kecamatan, ':kelurahan'=>$kelurahan, ':foto'=>$nama_foto, ':id'=>$id_laporan, ':user_id'=>$user_id];
+        } else {
+            $stmt = $pdo->prepare("UPDATE laporan SET judul=:judul, kategori=:kategori, deskripsi=:deskripsi, alamat=:alamat, kecamatan=:kecamatan, kelurahan=:kelurahan WHERE id=:id AND user_id=:user_id");
+            $params = [':judul'=>$judul, ':kategori'=>$kategori, ':deskripsi'=>$deskripsi, ':alamat'=>$alamat, ':kecamatan'=>$kecamatan, ':kelurahan'=>$kelurahan, ':id'=>$id_laporan, ':user_id'=>$user_id];
+        }
 
-        if (mysqli_query($koneksi, $query)) {
+        if ($stmt->execute($params)) {
             echo "<script>
                 alert('Laporan berhasil diperbarui!');
                 window.location.href = 'detailLaporan.php?id=$id_laporan';
@@ -85,8 +92,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Ambil data user
-$query_user = mysqli_query($koneksi, "SELECT * FROM users WHERE id = '$user_id'");
-$user       = mysqli_fetch_assoc($query_user);
+$stmt_user = $pdo->prepare("SELECT * FROM users WHERE id = :user_id");
+$stmt_user->execute([':user_id' => $user_id]);
+$user      = $stmt_user->fetch();
 ?>
 
 <!DOCTYPE html>

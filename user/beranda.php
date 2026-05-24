@@ -13,13 +13,14 @@ $nama     = $_SESSION['nama'];
 $username = $_SESSION['username'];
 
 // Ambil statistik laporan
-$total     = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id'"))['total'];
-$menunggu  = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Menunggu'"))['total'];
-$diproses  = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Diproses'"))['total'];
-$selesai   = mysqli_fetch_assoc(mysqli_query($koneksi, "SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Selesai'"))['total'];
+$total     = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id'")->fetch()['total'];
+$menunggu  = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Menunggu'")->fetch()['total'];
+$diproses  = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Diproses'")->fetch()['total'];
+$selesai   = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE user_id = '$user_id' AND status = 'Selesai'")->fetch()['total'];
 
 // Ambil 3 laporan terbaru
-$query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '$user_id' ORDER BY tanggal DESC LIMIT 3");
+$query_laporan = $pdo->prepare("SELECT * FROM laporan WHERE user_id = :id ORDER BY tanggal DESC LIMIT 3");
+$query_laporan->execute([':id' => $user_id]);
 ?>
 
 <!DOCTYPE html>
@@ -94,61 +95,7 @@ $query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '
     <div id="sidebarOverlay" class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar"
-        class="fixed inset-y-0 left-0 bg-white w-64 border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
-        <!-- Logo -->
-        <div class="h-16 flex items-center px-6 border-b border-slate-200">
-            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white mr-3">
-                <i data-lucide="leaf" class="w-5 h-5"></i>
-            </div>
-            <span class="text-primary font-extrabold text-2xl tracking-tight">Lapor<span class="text-accent">In</span></span>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="#" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
-                Beranda
-            </a>
-            <a href="buatLaporan.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="plus circle" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Buat Laporan
-            </a>
-            <a href="daftarLaporan.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="file-text" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Laporan Saya
-            </a>
-            <a href="profile.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Profil
-            </a>
-        </nav>
-
-        <!-- User Info (Bottom Sidebar) -->
-        <div class="p-4 border-t border-slate-200">
-            <a href="profile.php" class="flex items-center group">
-                <div
-                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
-                    <img src="<?php echo 'https://ui-avatars.com/api/?name=' . urlencode($username) . '&background=A3B18A&color=ffffff'; ?>"
-                    alt="Avatar" class="w-full h-full object-cover">
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">
-                        <?php echo $username; ?>
-                    </p>
-                    <p class="text-xs text-muted">Masyarakat</p>
-                </div>
-            </a>
-            <a href="logout.php"
-                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
-                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
-                Keluar
-            </a>
-        </div>
-    </aside>
+    <?php include 'sidebar.php'; ?>
 
     <!-- Main Wrapper -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
@@ -265,8 +212,8 @@ $query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '
                                     </tr>
                                 </thead>
                                 <tbody class="text-sm divide-y divide-slate-100">
-                                    <?php if(mysqli_num_rows($query_laporan) > 0): ?>
-                                        <?php while($laporan = mysqli_fetch_assoc($query_laporan)): ?>
+                                    <?php if($query_laporan->rowCount() > 0): ?>
+                                        <?php while($laporan = $query_laporan->fetch()): ?>
                                         <tr class="hover:bg-slate-50 transition-colors group cursor-pointer"
                                             onclick="window.location='detailLaporan.php?id=<?php echo $laporan['id']; ?>'">
                                             <td class="py-4 px-4">
@@ -318,9 +265,9 @@ $query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '
                             <div class="md:hidden flex flex-col divide-y divide-slate-100">
                                 <?php
                                 // Reset query pointer ke awal
-                                mysqli_data_seek($query_laporan, 0);
-                                if(mysqli_num_rows($query_laporan) > 0):
-                                    while($laporan = mysqli_fetch_assoc($query_laporan)):
+                                $query_laporan->execute([':id' => $user_id]);
+                                if($query_laporan->rowCount() > 0):
+                                    while($laporan = $query_laporan->fetch()):
                                 ?>
                                 <div class="p-4 hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer"
                                     onclick="window.location='detailLaporan.php?id=<?php echo $laporan['id']; ?>'">
@@ -371,23 +318,7 @@ $query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Sidebar Toggle Logic for Mobile
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-
-        function toggleSidebar() {
-            if (sidebar.classList.contains('-translate-x-full')) {
-                // Open Sidebar
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling background
-            } else {
-                // Close Sidebar
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-                document.body.style.overflow = 'auto'; // Re-enable scrolling
-            }
-        }
+        
     </script>
 </body>
 

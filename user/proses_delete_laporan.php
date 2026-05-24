@@ -32,12 +32,13 @@ if (!isset($_POST['id']) || empty($_POST['id'])) {
 require __DIR__ . '/../database/conection.php';
 
 $user_id = $_SESSION['user_id'];
-$laporan_id = mysqli_real_escape_string($koneksi, $_POST['id']);
+$laporan_id = (int) $_POST['id'];
 
 // Verify that the report belongs to the current user
-$query_check = mysqli_query($koneksi, "SELECT * FROM laporan WHERE id = '$laporan_id' AND user_id = '$user_id'");
+$stmt_check = $pdo->prepare("SELECT * FROM laporan WHERE id = :id AND user_id = :user_id");
+$stmt_check->execute([':id' => $laporan_id, ':user_id' => $user_id]);
 
-if (mysqli_num_rows($query_check) === 0) {
+if ($stmt_check->rowCount() === 0) {
     echo json_encode([
         'success' => false,
         'message' => 'Laporan tidak ditemukan atau Anda tidak memiliki izin untuk menghapus'
@@ -45,7 +46,7 @@ if (mysqli_num_rows($query_check) === 0) {
     exit();
 }
 
-$laporan = mysqli_fetch_assoc($query_check);
+$laporan = $stmt_check->fetch();
 
 // Delete associated files
 $upload_dir = __DIR__ . '/../uploads/foto_laporan/';
@@ -57,9 +58,10 @@ if (!empty($laporan['foto'])) {
 }
 
 // Delete the report from database
-$query_delete = mysqli_query($koneksi, "DELETE FROM laporan WHERE id = '$laporan_id' AND user_id = '$user_id'");
+$stmt_delete = $pdo->prepare("DELETE FROM laporan WHERE id = :id AND user_id = :user_id");
+$success = $stmt_delete->execute([':id' => $laporan_id, ':user_id' => $user_id]);
 
-if ($query_delete) {
+if ($success) {
     echo json_encode([
         'success' => true,
         'message' => 'Laporan berhasil dihapus'
@@ -67,9 +69,7 @@ if ($query_delete) {
 } else {
     echo json_encode([
         'success' => false,
-        'message' => 'Gagal menghapus laporan: ' . mysqli_error($koneksi)
+        'message' => 'Gagal menghapus laporan'
     ]);
 }
-
-mysqli_close($koneksi);
 ?>

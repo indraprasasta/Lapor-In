@@ -7,36 +7,44 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 require __DIR__ . '/../database/conection.php';
-//ngambil nama dari database 
+// Ambil nama user
 $user_id = $_SESSION['user_id'];
 $username = $_SESSION['username'];
 
-$query_user = mysqli_query($koneksi, "SELECT * FROM users WHERE id = '$user_id'");
-$user       = mysqli_fetch_assoc($query_user);
-// Ambil laporan milik user
-$query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan WHERE user_id = '$user_id' ORDER BY tanggal DESC");
-$total_laporan = mysqli_num_rows($query_laporan);
+$stmt_user = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+$stmt_user->execute([':id' => $user_id]);
+$user = $stmt_user->fetch();
 
-// Ambil kata pencarian jika ada
-$search = isset($_GET['search']) ? mysqli_real_escape_string($koneksi, $_GET['search']) : '';
-$filter_status = isset($_GET['status']) ? mysqli_real_escape_string($koneksi, $_GET['status']) : '';
-$filter_kategori = isset($_GET['kategori']) ? mysqli_real_escape_string($koneksi, $_GET['kategori']) : '';
+// Ambil data laporan
+$stmt_laporan = $pdo->prepare("SELECT * FROM laporan WHERE user_id = :id ORDER BY tanggal DESC");
+$stmt_laporan->execute([':id' => $user_id]);
+$total_laporan = $stmt_laporan->rowCount();
 
-// Bangun query dengan filter
-$where = "WHERE user_id = '$user_id'";
+// Cek pencarian filter
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$filter_status = isset($_GET['status']) ? trim($_GET['status']) : '';
+$filter_kategori = isset($_GET['kategori']) ? trim($_GET['kategori']) : '';
+
+// Bangun string query
+$where = "WHERE user_id = :id";
+$params = [':id' => $user_id];
 
 if ($search != '') {
-    $where .= " AND judul LIKE '%$search%'";
+    $where .= " AND judul LIKE :search";
+    $params[':search'] = "%$search%";
 }
 if ($filter_status != '' && $filter_status != 'all') {
-    $where .= " AND status = '$filter_status'";
+    $where .= " AND status = :status";
+    $params[':status'] = $filter_status;
 }
 if ($filter_kategori != '' && $filter_kategori != 'all') {
-    $where .= " AND kategori = '$filter_kategori'";
+    $where .= " AND kategori = :kategori";
+    $params[':kategori'] = $filter_kategori;
 }
 
-$query_laporan = mysqli_query($koneksi, "SELECT * FROM laporan $where ORDER BY tanggal DESC");
-$total_laporan = mysqli_num_rows($query_laporan);
+$query_laporan = $pdo->prepare("SELECT * FROM laporan $where ORDER BY tanggal DESC");
+$query_laporan->execute($params);
+$total_laporan = $query_laporan->rowCount();
 ?>
 
 <!DOCTYPE html>
@@ -111,61 +119,7 @@ $total_laporan = mysqli_num_rows($query_laporan);
     <div id="sidebarOverlay" class="fixed inset-0 bg-dark/50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar"
-        class="fixed inset-y-0 left-0 bg-white w-64 border-r border-slate-200 z-50 transform -translate-x-full lg:translate-x-0 lg:static lg:flex lg:flex-col transition-transform duration-300 ease-in-out">
-        <!-- Logo -->
-        <div class="h-16 flex items-center px-6 border-b border-slate-200">
-            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white mr-3">
-                <i data-lucide="leaf" class="w-5 h-5"></i>
-            </div>
-            <span class="text-primary font-extrabold text-2xl tracking-tight">Lapor<span class="text-accent">In</span></span>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            <a href="beranda.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Beranda
-            </a>
-            <a href="buatLaporan.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="plus-circle" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Buat Laporan
-            </a>
-            <a href="daftarLaporan.php" class="flex items-center px-3 py-2.5 bg-primary/10 text-primary rounded-lg font-medium group">
-                <i data-lucide="file-text" class="w-5 h-5 mr-3"></i>
-                Laporan Saya
-            </a>
-            <a href="profile.php"
-                class="flex items-center px-3 py-2.5 text-muted hover:text-dark hover:bg-slate-50 rounded-lg font-medium transition-colors group">
-                <i data-lucide="user" class="w-5 h-5 mr-3 group-hover:text-primary transition-colors"></i>
-                Profil
-            </a>
-        </nav>
-
-        <!-- User Info -->
-        <div class="p-4 border-t border-slate-200">
-            <a href="profile.php" class="flex items-center group">
-                <div
-                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-primary font-bold overflow-hidden border border-slate-200">
-                    <img src="<?php echo 'https://ui-avatars.com/api/?name=' . urlencode($username) . '&background=A3B18A&color=ffffff'; ?>"
-                    alt="Avatar" class="w-full h-full object-cover">
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-semibold text-dark group-hover:text-primary transition-colors">
-                        <?php echo $username; ?>
-                    </p>
-                    <p class="text-xs text-muted">Masyarakat</p>
-                </div>
-            </a>
-            <a href="logout.php"
-                class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm text-danger bg-red-50 hover:bg-red-100 rounded-lg font-medium transition-colors">
-                <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
-                Keluar
-            </a>
-        </div>
-    </aside>
+    <?php include 'sidebar.php'; ?>
 
     <!-- Main Wrapper -->
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
@@ -290,7 +244,7 @@ $total_laporan = mysqli_num_rows($query_laporan);
                             </thead>
                             <tbody class="text-sm divide-y divide-slate-100">
                         <?php if($total_laporan > 0): ?>
-                            <?php while($laporan = mysqli_fetch_assoc($query_laporan)): ?>
+                            <?php while($laporan = $query_laporan->fetch()): ?>
                             <tr class="hover:bg-slate-50 transition-colors group cursor-pointer" 
                                 onclick="window.location='detailLaporan.php?id=<?php echo $laporan['id']; ?>'">
                                 <td class="py-4 px-4 align-top">
@@ -338,10 +292,10 @@ $total_laporan = mysqli_num_rows($query_laporan);
                                         <!-- Mobile Card View -->
                     <div class="md:hidden flex flex-col divide-y divide-slate-100">
                         <?php 
-                        // Reset pointer query
-                        mysqli_data_seek($query_laporan, 0);
+                        // Eksekusi ulang query untuk reset
+                        $query_laporan->execute($params);
                         if($total_laporan > 0):
-                            while($laporan = mysqli_fetch_assoc($query_laporan)): 
+                            while($laporan = $query_laporan->fetch()): 
                         ?>
                         <div class="p-4 hover:bg-slate-50 transition-colors relative cursor-pointer group">
                             <div class="flex justify-between items-start mb-3">
@@ -430,20 +384,7 @@ $total_laporan = mysqli_num_rows($query_laporan);
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        // Sidebar Toggle Logic for Mobile
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        }
+        
 
         // Close modal when clicking outside
         document.getElementById('deleteModal').addEventListener('click', function(event) {
