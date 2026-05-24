@@ -15,16 +15,16 @@ $pesan_sukses = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && $_POST['step'] == '1') {
 
     $role     = $_POST['role'] ?? '';
-    $username = mysqli_real_escape_string($koneksi, trim($_POST['username']));
-    $verif    = mysqli_real_escape_string($koneksi, trim($_POST['verifikasi']));
+    $username = trim($_POST['username']);
+    $verif    = trim($_POST['verifikasi']);
 
     if ($role === 'masyarakat') {
         // Verifikasi dengan NIK
-        $query = mysqli_query($koneksi,
-            "SELECT id, nama FROM users WHERE username = '$username' AND nik = '$verif'"
-        );
-        if (mysqli_num_rows($query) === 1) {
-            $data = mysqli_fetch_assoc($query);
+        $stmt = $pdo->prepare("SELECT id, nama FROM users WHERE username = :username AND nik = :verif");
+        $stmt->execute([':username' => $username, ':verif' => $verif]);
+        
+        if ($stmt->rowCount() === 1) {
+            $data = $stmt->fetch();
             $_SESSION['reset_step'] = 2;
             $_SESSION['reset_id']   = $data['id'];
             $_SESSION['reset_role'] = 'masyarakat';
@@ -35,11 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && $_POST['st
 
     } elseif ($role === 'petugas') {
         // Verifikasi dengan NIP
-        $query = mysqli_query($koneksi,
-            "SELECT id, nama FROM petugas WHERE username = '$username' AND nip = '$verif'"
-        );
-        if (mysqli_num_rows($query) === 1) {
-            $data = mysqli_fetch_assoc($query);
+        $stmt = $pdo->prepare("SELECT id, nama FROM petugas WHERE username = :username AND nip = :verif");
+        $stmt->execute([':username' => $username, ':verif' => $verif]);
+        
+        if ($stmt->rowCount() === 1) {
+            $data = $stmt->fetch();
             $_SESSION['reset_step'] = 2;
             $_SESSION['reset_id']   = $data['id'];
             $_SESSION['reset_role'] = 'petugas';
@@ -79,9 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['step']) && $_POST['st
         $password_hash = password_hash($password_baru, PASSWORD_DEFAULT);
         $tabel = $role === 'petugas' ? 'petugas' : 'users';
 
-        $update = mysqli_query($koneksi,
-            "UPDATE $tabel SET password = '$password_hash' WHERE id = '$id'"
-        );
+        $stmt_update = $pdo->prepare("UPDATE $tabel SET password = :password WHERE id = :id");
+        $update = $stmt_update->execute([':password' => $password_hash, ':id' => $id]);
 
         if ($update) {
             // Bersihkan session reset

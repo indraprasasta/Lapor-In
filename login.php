@@ -1,9 +1,16 @@
 <?php
 session_start();
 
-// Jika sudah login, langsung redirect ke dashboard
+// Cek sesi login
+
 if (isset($_SESSION['user_id'])) {
     header("Location: user/beranda.php");
+    exit();
+} elseif (isset($_SESSION['petugas_id'])) {
+    header("Location: petugas/beranda.php");
+    exit();
+} elseif (isset($_SESSION['admin_id'])) {
+    header("Location: admin/beranda.php");
     exit();
 }
 
@@ -13,15 +20,16 @@ $pesan_error = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    $username = mysqli_real_escape_string($koneksi, $_POST['username']);
+    // Bersihkan input user
+    $username = trim($_POST['username']);
     $password = $_POST['password'];
 
-    // pengecekan untuk user dan petugas
-    //cek di bagian user dahulu
-    $query = mysqli_query($koneksi, "SELECT * FROM users WHERE username = '$username'");
+    // Cek data user
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username");
+    $stmt->execute([':username' => $username]);
 
-    if (mysqli_num_rows($query) == 1) {
-        $data = mysqli_fetch_assoc($query);
+    if ($stmt->rowCount() == 1) {
+        $data = $stmt->fetch();
         if (password_verify($password, $data['password'])) {
             $_SESSION['user_id']  = $data['id'];
             $_SESSION['username'] = $data['username'];
@@ -32,16 +40,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $pesan_error = "Password salah!";
         }
     } else {
-        // Cek di tabel petugas
-        $query_petugas = mysqli_query($koneksi, "
+        // Cek data petugas
+        $stmt_petugas = $pdo->prepare("
             SELECT petugas.*, dinas.nama_dinas 
             FROM petugas 
             JOIN dinas ON petugas.dinas_id = dinas.id 
-            WHERE petugas.username = '$username'
+            WHERE petugas.username = :username
         ");
+        $stmt_petugas->execute([':username' => $username]);
 
-        if (mysqli_num_rows($query_petugas) == 1) {
-            $petugas = mysqli_fetch_assoc($query_petugas);
+        if ($stmt_petugas->rowCount() == 1) {
+            $petugas = $stmt_petugas->fetch();
             if (password_verify($password, $petugas['password'])) {
                 $_SESSION['petugas_id']       = $petugas['id'];
                 $_SESSION['petugas_username'] = $petugas['username'];
@@ -55,7 +64,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $pesan_error = "Password salah!";
             }
         } else {
-            $pesan_error = "Username tidak ditemukan!";
+            // Cek data admin
+            $stmt_admin = $pdo->prepare("SELECT * FROM admin WHERE username = :username");
+            $stmt_admin->execute([':username' => $username]);
+            
+            if ($stmt_admin->rowCount() == 1) {
+                $admin = $stmt_admin->fetch();
+                if (password_verify($password, $admin['password'])) {
+                    $_SESSION['admin_id']   = $admin['id'];
+                    $_SESSION['admin_nama'] = $admin['nama'];
+                    $_SESSION['admin_username'] = $admin['username'];
+                    header("Location: admin/beranda.php");
+                    exit();
+                } else {
+                    $pesan_error = "Password salah!";
+                }
+            } else {
+                $pesan_error = "Username tidak ditemukan!";
+            }
         }
     }
 }

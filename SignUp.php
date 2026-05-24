@@ -6,30 +6,30 @@ require __DIR__ . '/database/conection.php';
 $pesan_error = "";
 $pesan_sukses = "";
 
-// Cek apakah form sudah disubmit
+// Cek kiriman form
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // 1. Tangkap data dari form (berdasarkan atribut 'name')
-    $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
-    $nik          = mysqli_real_escape_string($koneksi, $_POST['nik']);
-    $username     = mysqli_real_escape_string($koneksi, $_POST['username']);
+    // Tangkap data form
+    $nama         = trim($_POST['nama']);
+    $nik          = trim($_POST['nik']);
+    $username     = trim($_POST['username']);
     $password_hash = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $gender       = mysqli_real_escape_string($koneksi, $_POST['gender']);
-    $alamat       = mysqli_real_escape_string($koneksi, $_POST['alamat']);
+    $gender       = trim($_POST['gender']);
+    $alamat       = trim($_POST['alamat']);
 
-    // 2. Validasi sederhana (Cek apakah NIK atau Username sudah ada)
-    $cek_user = mysqli_query($koneksi, "SELECT * FROM users WHERE username = '$username' OR nik = '$nik'");
+    // Validasi data ganda
+    $stmt_cek = $pdo->prepare("SELECT * FROM users WHERE username = :username OR nik = :nik");
+    $stmt_cek->execute([':username' => $username, ':nik' => $nik]);
     
-    if (mysqli_num_rows($cek_user) > 0) {
+    if ($stmt_cek->rowCount() > 0) {
         $pesan_error = "Pendaftaran Gagal! Username atau NIK sudah terdaftar.";
     } else {
-        // 4. Query untuk memasukkan data ke tabel user
-        $query_insert = "INSERT INTO users (nama, nik, username, password, gender, alamat) 
-                VALUES ('$nama', '$nik', '$username', '$password_hash', '$gender', '$alamat')";
+        // Simpan data pendaftar
+        $stmt_insert = $pdo->prepare("INSERT INTO users (nama, nik, username, password, gender, alamat) VALUES (:nama, :nik, :username, :password, :gender, :alamat)");
 
-        // 5. Eksekusi query dan cek hasilnya
-        if (mysqli_query($koneksi, $query_insert)) {
-            // Jika sukses, arahkan ke halaman login
+        // Eksekusi query database
+        if ($stmt_insert->execute([':nama' => $nama, ':nik' => $nik, ':username' => $username, ':password' => $password_hash, ':gender' => $gender, ':alamat' => $alamat])) {
+            // Berhasil daftar akun
             $pesan_sukses = "Pendaftaran berhasil! Silakan login.";
         } else {
             $pesan_error = "Terjadi kesalahan sistem!";

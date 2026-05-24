@@ -1,10 +1,46 @@
 <?php
+session_start();
 require __DIR__ . '/database/conection.php';
-// Ambil 3 berita terbaru
-$query_berita = mysqli_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DESC LIMIT 3");
 
-// Ambil 3 laporan yang sudah selesai
-$query_selesai = mysqli_query($koneksi, "
+// Deteksi status login & tentukan link yang benar
+$is_logged_in = false;
+$link_dashboard = 'login.php';
+$link_laporan = 'login.php';
+$link_formulir = 'login.php';
+$link_berita = 'login.php';
+$logged_in_name = '';
+$logged_in_role = '';
+
+if (isset($_SESSION['user_id'])) {
+    $is_logged_in = true;
+    $link_dashboard = 'user/beranda.php';
+    $link_laporan = 'user/daftarLaporan.php';
+    $link_formulir = 'user/buatLaporan.php';
+    $link_berita = 'user/beranda.php';
+    $logged_in_name = $_SESSION['nama'] ?? 'User';
+    $logged_in_role = 'Masyarakat';
+} elseif (isset($_SESSION['petugas_id'])) {
+    $is_logged_in = true;
+    $link_dashboard = 'petugas/beranda.php';
+    $link_laporan = 'petugas/pengaduan.php?status=Selesai';
+    $link_formulir = 'force_logout.php';
+    $link_berita = 'petugas/beranda.php';
+    $logged_in_name = $_SESSION['petugas_nama'] ?? 'Petugas';
+    $logged_in_role = 'Petugas';
+} elseif (isset($_SESSION['admin_id'])) {
+    $is_logged_in = true;
+    $link_dashboard = 'admin/beranda.php';
+    $link_laporan = 'admin/dataLaporan.php';
+    $link_formulir = 'force_logout.php';
+    $link_berita = 'admin/daftarBerita.php';
+    $logged_in_name = $_SESSION['admin_nama'] ?? 'Admin';
+    $logged_in_role = 'Admin';
+}
+// Ambil data berita
+$query_berita = $pdo->query("SELECT * FROM berita ORDER BY tanggal DESC LIMIT 3");
+
+// Ambil laporan selesai
+$query_selesai = $pdo->query("
     SELECT laporan.*, users.nama as nama_pelapor
     FROM laporan
     JOIN users ON laporan.user_id = users.id
@@ -12,10 +48,25 @@ $query_selesai = mysqli_query($koneksi, "
     ORDER BY laporan.tanggal DESC
     LIMIT 3
 ");
-$query_kategori = mysqli_query($koneksi, "
+$query_kategori = $pdo->query("
     SELECT * FROM kategori_laporan
     WHERE aktif = 1
     ORDER BY tanggal_dibuat ASC
+");
+
+// Ambil akumulasi rating
+$query_rating = $pdo->query("SELECT AVG(rating) as avg_rating, COUNT(rating) as total_rating FROM laporan WHERE rating IS NOT NULL AND rating > 0");
+$rating_data = $query_rating->fetch();
+$avg_rating = $rating_data['total_rating'] > 0 ? round($rating_data['avg_rating'], 1) : 0;
+$total_rating = $rating_data['total_rating'];
+
+// Ambil akumulasi rating per kategori
+$query_rating_kategori = $pdo->query("
+    SELECT kategori, AVG(rating) as avg_rating, COUNT(rating) as total_rating 
+    FROM laporan 
+    WHERE rating IS NOT NULL AND rating > 0 
+    GROUP BY kategori 
+    ORDER BY total_rating DESC
 ");
 ?>
 <!DOCTYPE html>
@@ -88,8 +139,13 @@ $query_kategori = mysqli_query($koneksi, "
                 <li><a href="#portofolio">Portofolio</a></li>
                 <li><a href="#blog">Blog</a></li>
                 <li><a href="#kontak">Kontak</a></li>
+
             </ul>
+            <?php if($is_logged_in): ?>
+            <a href="<?php echo $link_dashboard; ?>" class="navbar__cta">Dashboard</a>
+            <?php else: ?>
             <a href="login.php" class="navbar__cta">Login Now</a>
+            <?php endif; ?>
             
             <button class="navbar__toggle" id="mobile-menu-btn" aria-label="Buka menu">
                 <i class="fa-solid fa-bars"></i>
@@ -104,7 +160,11 @@ $query_kategori = mysqli_query($koneksi, "
         <a href="#layanan">Layanan</a>
         <a href="#portofolio">Portofolio</a>
         <a href="#kontak">Kontak</a>
+        <?php if($is_logged_in): ?>
+        <a href="<?php echo $link_dashboard; ?>" class="navbar__mobile-cta">Dashboard</a>
+        <?php else: ?>
         <a href="login.php" class="navbar__mobile-cta">Lapor Sekarang</a>
+        <?php endif; ?>
     </div>
 </nav>
 <!-- HERO -->
@@ -123,7 +183,7 @@ $query_kategori = mysqli_query($koneksi, "
                 Temukan jalan rusak, pohon rawan tumbang, atau lampu jalan mati? Laporkan dengan mudah hanya melalui foto dan detail lokasi. Kami pastikan aduan Anda ditangani dengan cepat.
             </p>
             <div class="hero__actions">
-                <a href="login.php" class="btn btn--accent">
+                <a href="<?php echo $link_formulir; ?>" class="btn btn--accent">
                     <i class="fa-solid fa-camera"></i> Buat Laporan
                 </a>
                 <a href="#tentang" class="btn btn--outline">
@@ -143,7 +203,7 @@ $query_kategori = mysqli_query($koneksi, "
             </div>
 
             <div class="about__text reveal reveal-delay-2">
-                <h2 class="section__title">Tentang <span>LaporIn</span></h2>
+                <h2 class="section__title">Tentang <span>Kami</span></h2>
                 <p>
                     LaporIn adalah inisiatif digital yang menjembatani warga Kota Mataram dengan instansi terkait untuk menciptakan infrastruktur kota yang tangguh. Kami percaya bahwa setiap warga memiliki peran penting dalam memelihara keindahan dan keamanan lingkungan.
                 </p>
@@ -168,9 +228,9 @@ $query_kategori = mysqli_query($koneksi, "
 
         <div class="services__grid reveal reveal-delay-1">
 
-        <?php if(mysqli_num_rows($query_kategori) > 0): ?>
+        <?php if($query_kategori->rowCount() > 0): ?>
             
-            <?php while($kategori = mysqli_fetch_assoc($query_kategori)): ?>
+            <?php while($kategori = $query_kategori->fetch()): ?>
                 
             <article class="service-card">
                 <div class="service-card__icon reveal reveal-delay-2">
@@ -193,8 +253,11 @@ $query_kategori = mysqli_query($koneksi, "
         <?php endif; ?>
 
         </div>
+        </div>
     </div>
 </section>
+
+
 
 <!-- PORTOFOLIO -->
 <section id="portofolio" class="py-20 bg-primary">
@@ -202,13 +265,29 @@ $query_kategori = mysqli_query($koneksi, "
         <div class="flex flex-col lg:flex-row justify-between items-end mb-12">
             <div class="reveal reveal-delay-1">
                 <span class="text-accent font-semibold tracking-wider uppercase text-sm">Aksi Nyata</span>
-                <h2 class="text-3xl lg:text-4xl font-bold text-white mt-2">Laporan Terselesaikan</h2>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-2">
+                    <h2 class="text-3xl lg:text-4xl font-bold text-white">Laporan Terselesaikan</h2>
+                    <?php if($total_rating > 0): ?>
+                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-xl text-white">
+                        <span class="text-warning font-bold text-lg"><?php echo number_format($avg_rating, 1); ?></span>
+                        <div class="flex items-center">
+                            <?php 
+                            $rating_val = round($avg_rating);
+                            for($i=1; $i<=5; $i++): 
+                            ?>
+                                <i data-lucide="star" class="w-4 h-4 <?php echo ($i <= $rating_val) ? 'text-warning fill-warning' : 'text-white/30'; ?>"></i>
+                            <?php endfor; ?>
+                        </div>
+                        <span class="text-xs text-white/80 ml-1">(<?php echo $total_rating; ?> ulasan)</span>
+                    </div>
+                    <?php endif; ?>
+                </div>
             </div>
-            <a href="#" class="text-white border-b border-accent hover:text-accent transition-colors mt-4 lg:mt-0">Lihat Semua Laporan</a>
+            <a href="semuaLaporan.php" class="text-white border-b border-accent hover:text-accent transition-colors mt-4 lg:mt-0">Lihat Semua Laporan</a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 reveal reveal-delay-2">
-            <?php if(mysqli_num_rows($query_selesai) > 0): ?>
-                <?php while($selesai = mysqli_fetch_assoc($query_selesai)): ?>
+            <?php if($query_selesai->rowCount() > 0): ?>
+                <?php while($selesai = $query_selesai->fetch()): ?>
                 <div class="bg-white rounded-2xl overflow-hidden group">
                     <div class="relative h-56 overflow-hidden">
                         <?php if(!empty($selesai['foto'])): ?>
@@ -232,10 +311,22 @@ $query_kategori = mysqli_query($koneksi, "
                             <i class="fa-solid fa-map-pin mr-2"></i>
                             <?php echo $selesai['kelurahan'] . ', ' . $selesai['kecamatan']; ?>
                         </p>
-                        <p class="text-sm text-gray-500">
+                        <p class="text-sm text-gray-500 mb-4">
                             <i class="fa-regular fa-calendar mr-2"></i>
                             <?php echo date('d F Y', strtotime($selesai['tanggal'])); ?>
                         </p>
+                        <?php if(!empty($selesai['rating'])): ?>
+                        <div class="pt-4 border-t border-slate-100">
+                            <div class="flex items-center gap-1 mb-2">
+                                <?php for($i=1; $i<=5; $i++): ?>
+                                    <i data-lucide="star" class="w-4 h-4 <?php echo ($i <= $selesai['rating']) ? 'text-warning fill-warning' : 'text-slate-300'; ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <?php if(!empty($selesai['ulasan'])): ?>
+                            <p class="text-xs text-gray-600 italic line-clamp-2">"<?php echo htmlspecialchars($selesai['ulasan']); ?>"</p>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endwhile; ?>
@@ -330,13 +421,13 @@ $query_kategori = mysqli_query($koneksi, "
                 <h2 class="text-3xl lg:text-4xl font-bold text-primary mb-2">Kabar Mataram</h2>
                 <p class="text-gray-600">Berita terbaru seputar pembangunan dan infrastruktur kota.</p>
             </div>
-            <a href="#" class="hidden md:block text-accent hover:text-primary font-semibold">
+            <a href="semuaBerita.php" class="hidden md:block text-accent hover:text-primary font-semibold">
                 Lihat Semua Berita <i class="fa-solid fa-arrow-right ml-1"></i>
             </a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 reveal reveal-delay-2">
-            <?php if(mysqli_num_rows($query_berita) > 0): ?>
-                <?php while($berita = mysqli_fetch_assoc($query_berita)): ?>
+            <?php if($query_berita->rowCount() > 0): ?>
+                <?php while($berita = $query_berita->fetch()): ?>
                 <article class="bg-white rounded-2xl overflow-hidden shadow-sm">
                     <?php if(!empty($berita['foto'])): ?>
                     <img src="uploads/foto_berita/<?php echo $berita['foto']; ?>"
@@ -388,7 +479,7 @@ $query_kategori = mysqli_query($koneksi, "
     <div class="container cta__inner reveal reveal-delay-1">
         <h2>Siap Melaporkan Masalah?</h2>
         <p>Siapkan foto bukti, alamat lengkap, deskripsi singkat, serta tanggal dan waktu kejadian. Mari bersinergi membangun kota ini.</p>
-        <a href="login.php" class="btn--primary-cta">
+        <a href="<?php echo $link_formulir; ?>" class="btn--primary-cta">
             <i class="fa-solid fa-file-pen"></i> Menuju Formulir Pengaduan
         </a>
     </div>
@@ -480,9 +571,9 @@ $query_kategori = mysqli_query($koneksi, "
                 </div>
                 <p class="footer__desc">Menjadikan Kota Mataram lebih tertata dan aman lewat partisipasi aktif warganya. Setiap laporan Anda sangat berharga bagi kemajuan kota.</p>
                 <div class="footer__socials">
-                    <a href="#" class="footer__social"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="footer__social"><i class="fa-brands fa-twitter"></i></a>
-                    <a href="#" class="footer__social"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://facebook.com" class="footer__social" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://twitter.com" class="footer__social" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://instagram.com" class="footer__social" target="_blank"><i class="fa-brands fa-instagram"></i></a>
                 </div>
             </div>
 
@@ -499,10 +590,10 @@ $query_kategori = mysqli_query($koneksi, "
             <div class="footer__col">
                 <h4>Layanan Pengaduan</h4>
                 <ul class="footer__links">
-                    <li><a href="login.php">Lapor Jalan Rusak</a></li>
-                    <li><a href="login.php">Lapor Pohon Tumbang</a></li>
-                    <li><a href="login.php">Lapor Lampu Mati</a></li>
-                    <li><a href="#portofolio">Status Laporan</a></li>
+                    <li><a href="<?php echo $link_formulir; ?>">Lapor Jalan Rusak</a></li>
+                    <li><a href="<?php echo $link_formulir; ?>">Lapor Pohon Tumbang</a></li>
+                    <li><a href="<?php echo $link_formulir; ?>">Lapor Lampu Mati</a></li>
+                    <li><a href="<?php echo $is_logged_in ? $link_laporan : '#portofolio'; ?>">Status Laporan</a></li>
                 </ul>
             </div>
 
@@ -530,13 +621,7 @@ $query_kategori = mysqli_query($koneksi, "
 
         <div class="footer__bottom">
             <p>&copy; 2026 LaporIn Mataram. Seluruh hak cipta dilindungi.</p>
-            <div class="footer__bottom-links">
-                <a href="#">Kebijakan Privasi</a>
-                <span>|</span>
-                <a href="#">Syarat Ketentuan</a>
-                <span>|</span>
-                <a href="admin/login.php">Portal Admin</a>
-            </div>
+
         </div>
     </div>
 </footer>
