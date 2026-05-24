@@ -17,29 +17,31 @@ Setiap laporan akan diproses oleh admin dan diteruskan kepada petugas lapangan y
 
 ```
 USER
-  - Landing Page
+  - Landing Page (index.php)
   - Sign Up
   - Login
+      - Beranda / Dashboard
       - Membuat Laporan
-      - Melihat Status Laporan
-      - Edit & Hapus Laporan
-      - Mengelola Profil
+      - Melihat & Menelusuri Daftar Laporan
+      - Detail, Edit & Hapus Laporan (hanya status Menunggu)
+      - Rating & Ulasan Laporan (status Selesai)
+      - Mengelola Profil (foto, nama, alamat, username)
 
 ADMIN
-  - Landing Page
   - Login
       - Dashboard Statistik Laporan
-      - Manajemen Laporan (Assign Petugas)
-      - Manajemen Data Petugas
-      - Publikasi Berita & Pengumuman
-      - Manajemen Kategori Laporan
+      - Manajemen Laporan (Assign Petugas ke Laporan)
+      - Data Petugas (Tambah, Edit, Hapus)
+      - Data User (Lihat, Hapus beserta laporannya)
+      - Publikasi Berita (Buat, Edit, Hapus)
+      - Manajemen Kategori Laporan (Tambah, Toggle Aktif/Nonaktif, Hapus)
 
 PETUGAS
   - Login
-      - Dashboard Tugas
-      - Daftar Tugas yang Diterima
-      - Update Status Penanganan
-      - Riwayat Penanganan
+      - Dashboard Tugas (statistik total, diproses, selesai)
+      - Kelola Pengaduan (Masuk, Proses, Ditolak, Selesai)
+      - Detail Laporan per Pengaduan
+      - Update Status Penanganan (Diproses / Selesai / Ditolak)
 ```
 ---
 
@@ -64,6 +66,7 @@ PETUGAS
 | **Server** | Apache (XAMPP / LAMP) |
 | **Upload Handler** | PHP `move_uploaded_file()` |
 | **Session** | PHP Native Session |
+| **Alert & Dialog** | SweetAlert2 |
 
 ---
 
@@ -80,96 +83,6 @@ File     : /database/conection.php
 
 ---
 
-### 📊 Spesifikasi Tabel
-
-#### Tabel `users`
-Menyimpan data akun warga yang terdaftar.
-
-| Kolom | Tipe | Keterangan |
-|-------|------|------------|
-| `id` | INT, AUTO_INCREMENT, PK | ID unik user |
-| `nama` | VARCHAR(100) | Nama lengkap user |
-| `nik` | VARCHAR(16), UNIQUE | Nomor Induk Kependudukan (16 digit) |
-| `username` | VARCHAR(50), UNIQUE | Username untuk login |
-| `password` | VARCHAR(255) | Password akun |
-| `gender` | ENUM('Laki-laki','Perempuan') | Jenis kelamin |
-| `alamat` | TEXT | Alamat tempat tinggal |
-| `foto` | VARCHAR(255) | Nama file foto profil (disimpan di `uploads/foto_profil/`) |
-
----
-
-#### Tabel `admin`
-Menyimpan data akun administrator.
-
-| Kolom | Tipe | Keterangan |
-|-------|------|------------|
-| `id` | INT, AUTO_INCREMENT, PK | ID unik admin |
-| `nama` | VARCHAR(100) | Nama lengkap admin |
-| `username` | VARCHAR(50), UNIQUE | Username untuk login |
-| `password` | VARCHAR(255) | Password akun |
-
----
-
-#### Tabel `dinas`
-Menyimpan data instansi/dinas terkait.
-
-| Kolom | Tipe | Keterangan |
-|-------|------|------------|
-| `id` | INT, AUTO_INCREMENT, PK | ID unik dinas |
-| `kode_dinas` | VARCHAR(20) | Kode singkat dinas (cth: PUPR) |
-| `nama_dinas` | VARCHAR(100) | Nama lengkap dinas |
-
----
-
-#### Tabel `petugas`
-Menyimpan data akun petugas lapangan.
-
-| Kolom | Tipe | Keterangan |
-|-------|------|------------|
-| `id` | INT, AUTO_INCREMENT, PK | ID unik petugas |
-| `nama` | VARCHAR(100) | Nama lengkap petugas |
-| `nip` | VARCHAR(30), UNIQUE | Nomor Induk Pegawai |
-| `username` | VARCHAR(50), UNIQUE | Username untuk login |
-| `password` | VARCHAR(255) | Password akun |
-| `jabatan` | VARCHAR(100) | Jabatan petugas |
-| `dinas_id` | INT, FK → `dinas.id` | Referensi instansi petugas |
-
----
-
-#### Tabel `laporan`
-Menyimpan data laporan yang dikirim oleh warga.
-
-| Kolom | Tipe | Keterangan |
-|-------|------|------------|
-| `id` | INT, AUTO_INCREMENT, PK | ID unik laporan |
-| `user_id` | INT, FK → `users.id` | Pemilik laporan |
-| `judul` | VARCHAR(100) | Judul laporan |
-| `kategori` | VARCHAR(50) | Kategori masalah (Jalan Rusak, Pohon Tumbang, dll.) |
-| `deskripsi` | TEXT | Uraian detail masalah |
-| `foto` | VARCHAR(255) | Nama file foto bukti (disimpan di `uploads/foto_laporan/`) |
-| `alamat` | TEXT | Alamat lokasi kejadian |
-| `kecamatan` | VARCHAR(100) | Kecamatan lokasi |
-| `kelurahan` | VARCHAR(100) | Kelurahan lokasi |
-| `status` | ENUM('Menunggu','Diproses','Selesai','Ditolak') | Status penanganan laporan |
-| `petugas_id` | INT, FK → `petugas.id`, NULLABLE | Petugas yang ditugaskan (diisi oleh admin) |
-| `tanggal` | DATETIME / TIMESTAMP | Waktu laporan dibuat |
-
----
-
-#### Tabel `berita`
-Menyimpan data berita/pengumuman yang dipublikasikan admin.
-
-| Kolom | Tipe | Keterangan |
-|-------|------|------------|
-| `id` | INT, AUTO_INCREMENT, PK | ID unik berita |
-| `judul` | VARCHAR(200) | Judul berita |
-| `isi` | TEXT | Isi konten berita |
-| `foto` | VARCHAR(255) | Nama file foto berita (disimpan di `uploads/foto_berita/`) |
-| `kategori` | VARCHAR(50) | Kategori berita (Infrastruktur, Lingkungan, dll.) |
-| `tanggal` | DATETIME / TIMESTAMP | Waktu berita dipublikasikan |
-
----
-
 ## 💻 Teknologi
 
 `HTML` `CSS` `JavaScript` `PHP` `MySQL` `Apache`
@@ -180,39 +93,57 @@ Menyimpan data berita/pengumuman yang dipublikasikan admin.
 
 ```
 lapor-in/
-├── index.php                  # Landing page publik
-├── login.php                  # Login warga
-├── SignUp.php                 # Registrasi warga
+├── index.php                   # Landing page publik
+├── login.php                   # Halaman login (user, admin, petugas)
+├── SignUp.php                  # Registrasi warga
+├── semuaBerita.php             # Halaman publik semua berita
+├── semuaLaporan.php            # Halaman publik laporan terselesaikan
+├── lupaPassword.php            # Halaman lupa password
+├── fix_pass.php                # Utilitas: hash ulang password lama
+├── force_logout.php            # Utilitas: paksa logout semua sesi
 │
-├── user/                      # Halaman khusus warga
+├── user/                       # Halaman khusus warga (session: user_id)
 │   ├── beranda.php
 │   ├── buatLaporan.php
 │   ├── daftarLaporan.php
-│   ├── detailLaporan.php
-│   ├── editLaporan.php
+│   ├── detailLaporan.php       # Termasuk fitur rating & ulasan
+│   ├── editLaporan.php         # Hanya laporan berstatus Menunggu
+│   ├── proses_delete_laporan.php
 │   ├── profile.php
 │   ├── proses_profil.php
+│   ├── sidebar.php
 │   └── logout.php
 │
-├── admin/                     # Halaman khusus admin
-│   ├── login.php
+├── admin/                      # Halaman khusus admin (session: admin_id)
 │   ├── beranda.php
+│   ├── dataLaporan.php         # Manajemen laporan & assign petugas
+│   ├── detailLaporan.php
 │   ├── buatBerita.php
 │   ├── daftarBerita.php
-│   ├── manajemenLaporan.php
+│   ├── editBerita.php
 │   ├── dataPetugas.php
+│   ├── tambahpetugas.php
+│   ├── editPetugas.php
+│   ├── dataUser.php
 │   ├── kategoriLaporan.php
+│   ├── sidebar.php
 │   └── logout.php
 │
-├── petugas/                   # Halaman khusus petugas
+├── petugas/                    # Halaman khusus petugas (session: petugas_id)
 │   ├── beranda.php
-│   ├── daftarTugas.php
-│   └── detailTugas.php
+│   ├── pengaduan.php           # Kelola pengaduan per status
+│   ├── detailLaporan.php
+│   ├── update_status.php       # API update status laporan (POST/JSON)
+│   ├── sidebar.php
+│   └── logout.php
 │
 ├── database/
-│   └── conection.php          # Konfigurasi koneksi database
+│   └── conection.php           # Konfigurasi koneksi PDO MySQL
 │
-└── uploads/                   # Penyimpanan file upload
+├── src/
+│   └── style.css               # CSS kustom untuk landing page
+│
+└── uploads/                    # Penyimpanan file upload
     ├── foto_laporan/
     ├── foto_berita/
     └── foto_profil/
