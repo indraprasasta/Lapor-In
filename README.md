@@ -89,7 +89,7 @@ File     : /database/conection.php
 
 ---
 
-## 🗂️ Struktur Proyek
+## 🗂️ SITE MAP
 
 ```
 lapor-in/
