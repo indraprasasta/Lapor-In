@@ -7,9 +7,9 @@ Platform pelaporan infrastruktur berbasis web yang memungkinkan warga Kota Matar
 
 ## 📋 Deskripsi
 
-**Lapor-In** adalah sistem pelaporan masalah lingkungan dan infrastruktur kota yang dirancang untuk mewujudkan konsep *Smart City* di Kota Mataram. Warga dapat melaporkan berbagai masalah seperti jalan rusak, lampu jalan mati, pohon tumbang, hingga kerusakan saluran air hanya dengan mengunggah foto dan detail lokasi kejadian.
+**Lapor-In** dalah sistem pelaporan masalah lingkungan dan infrastruktur kota yang dirancang untuk mewujudkan konsep Smart City di Kota Mataram. Warga dapat melaporkan berbagai masalah seperti jalan rusak, lampu jalan mati, pohon tumbang, sampah menumpuk, hingga kerusakan fasilitas umum dengan mengunggah foto dan detail lokasi kejadian.
 
-Setiap laporan akan diproses oleh admin dan diteruskan kepada petugas lapangan yang bertanggung jawab, sehingga penanganan masalah menjadi lebih terstruktur dan akuntabel. Platform ini juga dilengkapi fitur berita/pengumuman dari dinas terkait untuk meningkatkan transparansi informasi kepada masyarakat.
+Setiap laporan akan ditinjau oleh admin yang kemudian mengubah status penanganan laporan (Menunggu → Diproses → Selesai / Ditolak). Petugas lapangan yang terdaftar pada dinas terkait dapat memantau dan memperbarui status laporan secara langsung melalui dashboard petugas. Warga juga dapat memberikan rating dan ulasan setelah laporan selesai ditangani. Platform ini juga dilengkapi fitur berita dan pengumuman untuk meningkatkan transparansi informasi kepada masyarakat.
 
 ---
 
