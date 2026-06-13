@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 23, 2026 at 03:20 PM
+-- Generation Time: Jun 13, 2026 at 12:33 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -173,9 +173,12 @@ INSERT INTO `laporan` (`id`, `user_id`, `judul`, `kategori`, `deskripsi`, `foto`
 (3, 7, 'Lampu di arena buah mati', 'Fasilitas Umum', 'lampu di arena buah mati menyebabkan kesulitan mencari buah yang sodop ', '1778057187_foto kopi.jpg', NULL, NULL, 'JL cendrawasih no 11 cakra barat', 'Cakranegara', 'Cakranegara Barat', 0.00000000, 0.00000000, 'Selesai', '2026-05-06 08:46:27'),
 (4, 5, 'Empat Pohon di Mataram Kembali Tumbang, Tak Ada Korban dan Kerugian Warga', 'Pohon Tumbang', 'Hujan lebat disertai angin kencang terjadi di wilayah Mataram, Minggu. Peristiwa itu mengakibatkan pohon tumbang di beberapa tempat.\r\n\r\n\r\n”Total ada empat pohon yang tumbang,” kata Kepala Dinas Lingkungan Hidup  (DLH) Kota Mataram H Nizar Denny Cahyadi.\r\nPohon tumbang terjadi di Jalan Udayana, di depan rumah dinas Kajati NTB, dan di depan SDN 2 Karang Jangkong.\r\n”Kalau yang di Jalan Udayana ada dua pohon yang tumbang,” terangnya.\r\nSaat ini, masyarakat harus lebih waspada. Belum seluruhnya angin barat itu memasuki wilayah Mataram.\r\n”Angin barat belum sepenuhnya menjangkau Mataram,” terangnya.\r\nJika masyarakat menemukan adanya hujan yang disertai angin kencang diminta untuk tidak melanjutkan perjalanan. Mengantisipasi hal-hal yang tidak diinginkan.\r\n”Lebih baik cari yang aman dulu,” kata dia.', '1778482891_pohontumbang1.jpg', NULL, NULL, 'Jalan Udayana, di depan rumah dinas Kajati NTB, dan di depan SDN 2 Karang Jangkong.', 'Mataram', 'Mataram Barat', 0.00000000, 0.00000000, 'Selesai', '2026-05-11 07:01:31'),
 (5, 6, 'Lampu merah di perempatan rembiga rusak', 'Lampu Jalan Mati', 'lampu merah di simpang 4 rembiga mati sehingga menimbulkan kemacetan yang dahsyat', '1779027166_lampu rusak.jpg', NULL, NULL, 'JL. rembiga sukarno hatta', 'Selaparang', 'Rembiga', 0.00000000, 0.00000000, 'Selesai', '2026-05-17 14:12:46'),
-(7, 5, 'jalanan rusak di daerah pagesangan', 'Jalan Rusak', 'jalanan rusak yang menyebabkan kecelakaan yang serius di jalan pagesangan', '1779191577_foto jalan berlubang.jpg', NULL, NULL, 'jl pagesngan timur gajah mada', 'Mataram', 'Pagesangan', 0.00000000, 0.00000000, 'Selesai', '2026-05-19 11:52:57'),
-(17, 5, 'Sampah menumpuk', 'Sampah Menumpuk', 'sampah menumpuk sehingga mengakibatkan kemacetan karena sampah hingga masuk ke area jalan', '1779383415_sampah.jpg', NULL, NULL, 'Jl karang jasi cakra', 'Cakranegara', 'Cilinaya', 0.00000000, 0.00000000, 'Diproses', '2026-05-21 17:10:15'),
-(18, 6, 'Jalan hancur ', 'Jalan rusak', 'jalan rusak di sekitar gomong yang menyebabkan kemacetan dikarenakan tidak ada jalan lain', '1779412839_rusakni.jpg', NULL, NULL, 'JL pendidikan raya no 234 gomong', 'Selaparang', 'Gomong', 0.00000000, 0.00000000, 'Menunggu', '2026-05-22 01:20:39');
+(7, 5, 'jalanan rusak di daerah pagesangan', 'Jalan Rusak', 'jalanan rusak yang menyebabkan kecelakaan yang serius di jalan pagesangan', '1779191577_foto jalan berlubang.jpg', 4, 'asep', 'jl pagesngan timur gajah mada', 'Mataram', 'Pagesangan', 0.00000000, 0.00000000, 'Selesai', '2026-05-19 11:52:57'),
+(17, 5, 'Sampah menumpuk', 'Sampah Menumpuk', 'sampah menumpuk sehingga mengakibatkan kemacetan karena sampah hingga masuk ke area jalan', '1779383415_sampah.jpg', NULL, NULL, 'Jl karang jasi cakra', 'Cakranegara', 'Cilinaya', 0.00000000, 0.00000000, 'Selesai', '2026-05-21 17:10:15'),
+(18, 6, 'Jalan hancur ', 'Jalan rusak', 'jalan rusak di sekitar gomong yang menyebabkan kemacetan dikarenakan tidak ada jalan lain', '1779412839_rusakni.jpg', NULL, NULL, 'JL pendidikan raya no 234 gomong', 'Selaparang', 'Gomong', 0.00000000, 0.00000000, 'Selesai', '2026-05-22 01:20:39'),
+(19, 16, 'Lampu rusak', 'Lampu Jalan Mati', 'lampu pagesangan', '1779608087_lampu rusak.jpg', NULL, NULL, 'majapahit', 'Ampenan', 'Ampenan Selatan', -8.58343151, 116.12059705, 'Menunggu', '2026-05-24 07:34:47'),
+(20, 16, 'jalan rusak', 'Jalan rusak', 'jalan rusak di unram', '1779675173_WhatsApp Image 2026-05-24 at 21.57.45.jpeg', 5, 'mantap sekali ni', 'unram', 'Selaparang', 'Gomong', -8.61788689, 116.13048036, 'Selesai', '2026-05-25 02:12:53'),
+(21, 16, 'gaza', 'Jalan rusak', 'jalan rusak', '1779676535_WhatsApp Image 2026-05-24 at 21.57.45.jpeg', NULL, NULL, 'unram', 'Ampenan', 'Ampenan Selatan', -8.57764338, 116.10167320, 'Selesai', '2026-05-25 02:35:35');
 
 -- --------------------------------------------------------
 
@@ -203,7 +206,8 @@ INSERT INTO `petugas` (`id`, `nama`, `nip`, `username`, `password`, `jabatan`, `
 (1, 'gazagaza', '1029384756242', 'gazasiap', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', '', 3, NULL, '2026-05-16 04:16:49'),
 (2, 'indra', '1234567890', 'indrokasino', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', '', 2, NULL, '2026-05-16 09:36:28'),
 (3, 'ajria danuarta', '0982947295249', 'ajriaped', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', '', 4, NULL, '2026-05-17 13:27:59'),
-(4, 'habib azahri', '2847294249249', 'habibdud', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', '', 1, NULL, '2026-05-17 13:29:00');
+(4, 'habib azahri', '2847294249249', 'habibdud', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', '', 1, NULL, '2026-05-17 13:29:00'),
+(6, 'asep asep', '12345678', 'asep', '$2y$10$y3RUv5CjSjwPP03rN6zcBejrjMyg0r1rCmAjcgipwbfUFI.iU4i9y', 'staff', 3, NULL, '2026-05-25 00:05:17');
 
 -- --------------------------------------------------------
 
@@ -227,11 +231,13 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `nama`, `nik`, `username`, `password`, `gender`, `alamat`, `foto`) VALUES
-(5, 'i wayan girindra', '1234567890123456', 'prasasta', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', 'Laki-laki', 'JL beaq ganggas no 46', '1777726261_foto indra.jpeg'),
+(5, 'i wayan girindra', '1234567890123456', 'prasasta', '$2y$10$wvl27ZPbo37Hreo7Ib/n5eWLBzlYeERpfmldGpMnTk3c6lV5y/5mq', 'Laki-laki', 'JL beaq ganggas no 46', '1777726261_foto indra.jpeg'),
 (6, 'gazamuhammad', '1029384785763943', 'gazambrl', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', 'Laki-laki', 'pagutan', ''),
 (7, 'ni nengah ayu mirah cupes', '0987654321123456', 'cemplon', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', 'Perempuan', 'kr sampalan', ''),
 (9, 'habib', '1928192918122222', 'duda', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', 'Laki-laki', 'lotim anjay', ''),
-(10, 'ajria', '1010192929383832', 'ped', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', 'Perempuan', 'kekalik jaya superr', '');
+(10, 'ajria', '1010192929383832', 'ped', '$2y$10$yvJblwiNhbybc0ZEmVmaZefpWS69Ok4Rp0L7KwEIe3C9AP2nXWGUW', 'Perempuan', 'kekalik jaya superr', ''),
+(16, 'asep gomong', '1111111122222222', 'asep', '$2y$10$r76o3Tf22HtNCfz6aSst9uhew1DaXMW5EonfR8kbNEM.kj9bkNIF6', 'Laki-laki', 'pagutan', '1779675257_WhatsApp Image 2026-05-24 at 21.57.45.jpeg'),
+(17, 'sigsdjgsd', '1123328748247284', 'indra', '$2y$10$k7YDu3HhSBRX/aeo27r9a.Vo3SAqww0wnt1gQOlvnF0ZlJkNs7MP2', 'Laki-laki', 'unram', '');
 
 --
 -- Indexes for dumped tables
@@ -331,19 +337,19 @@ ALTER TABLE `kategori_laporan`
 -- AUTO_INCREMENT for table `laporan`
 --
 ALTER TABLE `laporan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `petugas`
 --
 ALTER TABLE `petugas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Constraints for dumped tables
