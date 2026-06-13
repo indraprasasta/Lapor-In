@@ -17,31 +17,29 @@ Setiap laporan akan ditinjau oleh admin yang kemudian mengubah status penanganan
 
 ```
 USER
-  - Landing Page (index.php)
+  - Landing Page
   - Sign Up
   - Login
-      - Beranda / Dashboard
       - Membuat Laporan
-      - Melihat & Menelusuri Daftar Laporan
-      - Detail, Edit & Hapus Laporan (hanya status Menunggu)
-      - Rating & Ulasan Laporan (status Selesai)
-      - Mengelola Profil (foto, nama, alamat, username)
+      - Melihat Status Laporan
+      - Edit & Hapus Laporan
+      - Mengelola Profil
 
 ADMIN
+  - Landing Page
   - Login
       - Dashboard Statistik Laporan
-      - Manajemen Laporan (Assign Petugas ke Laporan)
-      - Data Petugas (Tambah, Edit, Hapus)
-      - Data User (Lihat, Hapus beserta laporannya)
-      - Publikasi Berita (Buat, Edit, Hapus)
-      - Manajemen Kategori Laporan (Tambah, Toggle Aktif/Nonaktif, Hapus)
+      - Manajemen Laporan (Assign Petugas)
+      - Manajemen Data Petugas
+      - Publikasi Berita & Pengumuman
+      - Manajemen Kategori Laporan
 
 PETUGAS
   - Login
-      - Dashboard Tugas (statistik total, diproses, selesai)
-      - Kelola Pengaduan (Masuk, Proses, Ditolak, Selesai)
-      - Detail Laporan per Pengaduan
-      - Update Status Penanganan (Diproses / Selesai / Ditolak)
+      - Dashboard Tugas
+      - Daftar Tugas yang Diterima
+      - Update Status Penanganan
+      - Riwayat Penanganan
 ```
 ---
 
@@ -66,7 +64,6 @@ PETUGAS
 | **Server** | Apache (XAMPP / LAMP) |
 | **Upload Handler** | PHP `move_uploaded_file()` |
 | **Session** | PHP Native Session |
-| **Alert & Dialog** | SweetAlert2 |
 
 ---
 
@@ -89,64 +86,154 @@ File     : /database/conection.php
 
 ---
 
-## 🗂️ SITE MAP
+## 🗂️ Struktur Proyek
 
 ```
 lapor-in/
-├── index.php                   # Landing page publik
-├── login.php                   # Halaman login (user, admin, petugas)
-├── SignUp.php                  # Registrasi warga
-├── semuaBerita.php             # Halaman publik semua berita
-├── semuaLaporan.php            # Halaman publik laporan terselesaikan
-├── lupaPassword.php            # Halaman lupa password
-├── fix_pass.php                # Utilitas: hash ulang password lama
-├── force_logout.php            # Utilitas: paksa logout semua sesi
+├── index.php                  # Landing page publik
+├── login.php                  # Login warga
+├── SignUp.php                 # Registrasi warga
 │
-├── user/                       # Halaman khusus warga (session: user_id)
+├── user/                      # Halaman khusus warga
 │   ├── beranda.php
 │   ├── buatLaporan.php
 │   ├── daftarLaporan.php
-│   ├── detailLaporan.php       # Termasuk fitur rating & ulasan
-│   ├── editLaporan.php         # Hanya laporan berstatus Menunggu
-│   ├── proses_delete_laporan.php
+│   ├── detailLaporan.php
+│   ├── editLaporan.php
 │   ├── profile.php
 │   ├── proses_profil.php
-│   ├── sidebar.php
 │   └── logout.php
 │
-├── admin/                      # Halaman khusus admin (session: admin_id)
+├── admin/                     # Halaman khusus admin
+│   ├── login.php
 │   ├── beranda.php
-│   ├── dataLaporan.php         # Manajemen laporan & assign petugas
-│   ├── detailLaporan.php
 │   ├── buatBerita.php
 │   ├── daftarBerita.php
-│   ├── editBerita.php
+│   ├── manajemenLaporan.php
 │   ├── dataPetugas.php
-│   ├── tambahpetugas.php
-│   ├── editPetugas.php
-│   ├── dataUser.php
 │   ├── kategoriLaporan.php
-│   ├── sidebar.php
 │   └── logout.php
 │
-├── petugas/                    # Halaman khusus petugas (session: petugas_id)
+├── petugas/                   # Halaman khusus petugas
 │   ├── beranda.php
-│   ├── pengaduan.php           # Kelola pengaduan per status
-│   ├── detailLaporan.php
-│   ├── update_status.php       # API update status laporan (POST/JSON)
-│   ├── sidebar.php
-│   └── logout.php
+│   ├── daftarTugas.php
+│   └── detailTugas.php
 │
 ├── database/
-│   └── conection.php           # Konfigurasi koneksi PDO MySQL
+│   └── conection.php          # Konfigurasi koneksi database
 │
-├── src/
-│   └── style.css               # CSS kustom untuk landing page
-│
-└── uploads/                    # Penyimpanan file upload
+└── uploads/                   # Penyimpanan file upload
     ├── foto_laporan/
     ├── foto_berita/
     └── foto_profil/
+```
+---
+
+## BUG LOG
+
+```
+##### BUG 1
+1) Gejala             : Bisa masuk dengan URL tanpa login
+2) Langkah reproduksi : Menganalisa lokasi kesalahan
+3) Hipotesis penyebab : Kurang fungsi backend
+4) Fix                : if (!isset($_SESSION['user_id'])) { header("Location: ../login.php"); exit(); }
+5) Bukti              : 4515c20
+
+##### BUG 2
+1) Gejala             : Tidak ada transparansi kerja petugas (bisa asal isi finish pejerkaan)
+2) Langkah reproduksi : Menganalisa lokasi kesalahan
+3) Hipotesis penyebab : Fitur Kurang jadi menambahkan fitur rating pada user
+4) Fix                : Memperbaiki database user (menambahkan rating), memperbaiki file folder user
+5) Bukti              : 578ddcd
+
+##### BUG 3
+1) Gejala             : Tidak ada Minimal password ketika SIGN UP
+2) Langkah reproduksi : Menganalisa lokasi kesalahan
+3) Hipotesis penyebab : Kurang Kondisi
+4) Fix                : if (strlen($password) < 6) {$pesan_error = 'Password minimal 6 karakter.';}
+5) Bukti              : 067cb7
+```
+
+---
+## AI Usage Statement
+
+```
+##### 1
+1) Tool                           : Claude
+2) Untuk apa                      : Brainstorming
+3) 2-3 prompt utama               : Jelaskan saya perbedaan PDO dengan mysqli
+4) Bagian output AI yang dipakai  : -
+5) Bagian yang saya ubah + alasan : -
+
+##### 2
+1) Tool                           : Claude
+2) Untuk apa                      : Membantu efisiensi CSS
+3) 2-3 prompt utama               : Dari file CSS ini buatkan saya versi tailwind untuk file...
+4) Bagian output AI yang dipakai  : Pada bagian beranda admin
+5) Bagian yang saya ubah + alasan : warna, variable, font, untuk menyesuaikan UI dengan keinginan
+
+##### 3
+1) Tool                           : Claude
+2) Untuk apa                      : Mencari Bug
+3) 2-3 prompt utama               : Dari Project WEB saya yang sudah jadi, adakah bug / keanehan yang anda temukan?
+4) Bagian output AI yang dipakai  : Pada bagian petugas, petugas dapat input status tanpa transparansi apakah pekerjaannya sudah selesai atau belum
+5) Bagian yang saya ubah + alasan : Update bagian user dan menambahkan data pada tabel user untuk rating kinerja petugas pada laporan yang sudah kita berikan
+```
+
+---
+
+## Pertanyaan Presentasi
+
+```
+##### Pertanyaan 1
+1) Nama       : Azizurrifki
+2) NIM        : F1D02410037
+3) Pertanyaan : Pesan Berhasil atau kesalahan input tidak semua ada
+4) Tanggapan  : Kelolosan (diperbaiki belakangan)
+5) Status     : DONE (Success)
+
+##### Pertanyaan 2
+1) Nama       : Salsabila Nailafahdi
+2) NIM        : F1D02410135
+3) Pertanyaan : Minimal Karakter Password saat sign up tidak ada
+4) Tanggapan  : Live Coding Memperbaiki Kesalahan
+5) Status     : DONE (Success)
+
+##### Pertanyaan 3
+1) Nama       : Royana Afwani, S.T., M.T. (Dosen Pengampu PEMWEB)
+2) Pertanyaan : Perbedaan Kegunaan Session pada file admin/beranda.php dan login.php
+3) Tanggapan  : admin/beranda.php (untuk menjaga url dan bekas login admin), login.php (untuk bekas login admin dan memvalidasi usn & pw)
+4) Status     : DONE (Success)
+
+##### Pertanyaan 4
+1) Nama       : Royana Afwani, S.T., M.T. (Dosen Pengampu PEMWEB)
+2) Pertanyaan : WEB real-time (update informasi tanpa refresh)
+3) Tanggapan  : Belum eksplor sejauh itu karena sedikit yang kami tau WEB berbeda dengan Mobile untuk update secara real-time
+4) Status     : DONE (Success)
+
+##### Pertanyaan 5
+1) Nama       : Royana Afwani, S.T., M.T. (Dosen Pengampu PEMWEB)
+2) Pertanyaan : Penjelasan tentang tailwind dan css
+3) Tanggapan  : Kita menggunakan tailwind untuk memudahkan dan efisiensi kode, karena ketika kita menggunakan .css untuk 1 halaman saja memakan 1k line
+4) Status     : DONE (Success)
+
+##### Pertanyaan 6
+1) Nama       : Royana Afwani, S.T., M.T. (Dosen Pengampu PEMWEB)
+2) Pertanyaan : Penjelasan tentang PDO & Query
+3) Tanggapan  : PDO (Php Data Object) berfungsi untuk mengambil data dari database, join digunakan untuk menggabungkan dua tabel berdasarkan kolom yang sama
+4) Status     : DONE (Success)
+
+##### Pertanyaan 7
+1) Nama       : Royana Afwani, S.T., M.T. (Dosen Pengampu PEMWEB)
+2) Pertanyaan : Penjelasan tentang interaksi antara frontend dan backend pada JS (const kecamatanLabels = <?php echo json_encode($kecamatan_labels); ?>;)
+3) Tanggapan  : untuk mengubah array PHP menjadi format yang bisa digunakan di JavaScript. Fungsi json_encode() akan mengonversi array PHP menjadi string JSON, yang kemudian dapat diakses sebagai array JavaScript.
+4) Status     : DONE (Success)
+
+##### Pertanyaan 8
+1) Nama       : Royana Afwani, S.T., M.T. (Dosen Pengampu PEMWEB)
+2) Pertanyaan : Menunjukkan korelasi kode JavaScript
+3) Tanggapan  : Menjelaskan kode dan menunjukkan korelasi dari kode kode yang di tunjukkan
+4) Status     : DONE (Success)
 ```
 
 ---
