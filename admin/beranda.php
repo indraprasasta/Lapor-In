@@ -6,9 +6,11 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-$admin_nama = $_SESSION['admin_nama'];
+// $admin_nama = $_SESSION['admin_nama'];
 
 require __DIR__ . '/../database/conection.php';
+
+// PDO adalah lapisan abstraksi database bawaan PHP. Artinya PDO bertindak sebagai perantara antara kode PHP dan database
 
 $total      = $pdo->query("SELECT COUNT(*) as total FROM laporan")->fetch()['total'];
 $hari_ini   = $pdo->query("SELECT COUNT(*) as total FROM laporan WHERE DATE(tanggal) = CURDATE()")->fetch()['total'];
@@ -404,7 +406,7 @@ $notif_count = $pdo->query(
       Chart.defaults.font.family = "'Poppins', sans-serif";
       Chart.defaults.color = "#94A3B8"; // text-slate-400
       Chart.defaults.scale.grid.color = "#F1F5F9"; // slate-100
-
+      
       const kecamatanLabels = <?php echo json_encode($kecamatan_labels); ?>;
       const kecamatanData   = <?php echo json_encode($kecamatan_data); ?>;
 
