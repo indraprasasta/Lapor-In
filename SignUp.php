@@ -20,8 +20,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validasi data ganda
     $stmt_cek = $pdo->prepare("SELECT * FROM users WHERE username = :username OR nik = :nik");
     $stmt_cek->execute([':username' => $username, ':nik' => $nik]);
-    
-    if ($stmt_cek->rowCount() > 0) {
+
+    if (strlen($password) < 6) {
+        $pesan_error = 'Password minimal 6 karakter.';
+
+    } elseif ($stmt_cek->rowCount() > 0) {
         $pesan_error = "Pendaftaran Gagal! Username atau NIK sudah terdaftar.";
     } else {
         // Simpan data pendaftar
@@ -36,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -221,6 +225,29 @@ Swal.fire({
 }).then(() => {
     window.location.href = 'login.php';
 });
+
+document.getElementById('passwordBaru')?.addEventListener('input', function() {
+        const val    = this.value;
+        const bars   = [document.getElementById('bar1'), document.getElementById('bar2'),
+                        document.getElementById('bar3'), document.getElementById('bar4')];
+        const text   = document.getElementById('strengthText');
+        const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+        const labels = ['Sangat Lemah', 'Lemah', 'Cukup', 'Kuat'];
+
+        let score = 0;
+        if (val.length >= 6)                      score++;
+        if (val.length >= 10)                     score++;
+        if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val))             score++;
+
+        bars.forEach((bar, i) => {
+            bar.className = 'h-1 flex-1 rounded-full ';
+            bar.className += i < score ? colors[score - 1] : 'bg-slate-200';
+        });
+
+        text.textContent = val.length === 0 ? 'Kekuatan password' : labels[score - 1] || 'Sangat Lemah';
+    });
+
 </script>
 <?php endif; ?>
 

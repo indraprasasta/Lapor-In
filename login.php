@@ -1,8 +1,6 @@
 <?php
 session_start();
 
-// Cek sesi login
-
 if (isset($_SESSION['user_id'])) {
     header("Location: user/beranda.php");
     exit();
@@ -17,6 +15,10 @@ if (isset($_SESSION['user_id'])) {
 require __DIR__ . '/database/conection.php';
 
 $pesan_error = "";
+
+// if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['username'])) {
+//     $username = trim($_GET['username']);
+//     $password = $_GET['password'];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
