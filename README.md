@@ -238,6 +238,25 @@ lapor-in/
 
 ---
 
+## 🖼️ Tampilan Aplikasi
+
+### Beranda
+![Beranda](dokumentasi_Readme/BerandaAwal.png)
+
+### Dashboard User
+![Dashboard User](dokumentasi_Readme/DasboardUser.png)
+
+### Dashboard Admin
+![Dashboard Admin](dokumentasi_Readme/DashboardAdmin.png)
+
+### Dashboard Petugas
+![Dashboard Petugas](dokumentasi_Readme/DashboardPetugas.png)
+
+### Menu Login
+![Menu Login](dokumentasi_Readme/MenuLogin.png)
+
+---
+
 ## 🌐 Alamat Website
 
 ```
